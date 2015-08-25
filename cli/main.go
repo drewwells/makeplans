@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/kr/pretty"
 )
@@ -38,6 +41,19 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Printf("% #v\n", pretty.Formatter(svcs))
+
+	svc := svcs[0]
+	svc.Price = "20.0"
+	err = client.ServiceSave(svc)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	svcs, _ = client.Services()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("% #v\n", pretty.Formatter(svcs[0]))
 }
 
 var BaseURL = "https://%s.test.makeplans.net/api/v1"
@@ -47,14 +63,14 @@ type Client struct {
 	Token       string
 }
 
-func (c *Client) do(method string, path string) (*http.Response, error) {
+func (c *Client) do(method string, path string, body io.Reader) (*http.Response, error) {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	httpCli := &http.Client{Transport: tr}
 
 	req, err := http.NewRequest(method,
-		fmt.Sprintf(BaseURL, c.AccountName)+path, nil)
+		fmt.Sprintf(BaseURL, c.AccountName)+path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +82,8 @@ func (c *Client) do(method string, path string) (*http.Response, error) {
 	return httpCli.Do(req)
 }
 
-func (c *Client) Do(method string, path string) ([]byte, error) {
-	r, err := c.do(method, path)
+func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) {
+	r, err := c.do(method, path, body)
 	if err != nil {
 		return nil, err
 	}
@@ -101,16 +117,17 @@ type Service struct {
 	UpdatedAt             string      `json:"updated_at"`
 }
 
+type serviceWrap struct {
+	Service Service `json:"service"`
+}
+
 func (c *Client) Services() ([]Service, error) {
-	bs, err := c.Do("GET", ServiceURL)
+	bs, err := c.Do("GET", ServiceURL, nil)
 	if err != nil {
 		return nil, err
 	}
 	// unwrap data structure provided
-	type wrap []struct {
-		Service Service `json:"service"`
-	}
-	wr := wrap{}
+	wr := []serviceWrap{}
 	err = json.Unmarshal(bs, &wr)
 
 	// Assign to a proper struct
@@ -119,4 +136,20 @@ func (c *Client) Services() ([]Service, error) {
 		svcs[i] = w.Service
 	}
 	return svcs, err
+}
+
+func (c *Client) ServiceSave(svc Service) error {
+	id := strconv.Itoa(svc.ID)
+	payload, err := json.Marshal(serviceWrap{Service: svc})
+	if err != nil {
+		return err
+	}
+	fmt.Println("preparing:", string(payload))
+	buf := bytes.NewBuffer(payload)
+	bs, err := c.Do("PUT", ServiceURL+"/"+id, buf)
+	if err != nil {
+		return err
+	}
+	fmt.Println("return", string(bs))
+	return nil
 }
