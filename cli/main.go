@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/kr/pretty"
+	"time"
 )
 
 type account struct {
@@ -40,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("% #v\n", pretty.Formatter(svcs))
+	fmt.Printf("% #v\n", svcs)
 
 	svc := svcs[0]
 	svc.Price = "20.0"
@@ -53,7 +53,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("% #v\n", pretty.Formatter(svcs[0]))
+	fmt.Printf("% #v\n", svcs[0])
 }
 
 var BaseURL = "https://%s.test.makeplans.net/api/v1"
@@ -97,7 +97,6 @@ type Service struct {
 	Active                bool        `json:"active"`
 	BookingCapacity       int         `json:"booking_capacity"`
 	BookingTypeID         int         `json:"booking_type_id"`
-	CreatedAt             string      `json:"created_at"`
 	CustomData            interface{} `json:"custom_data"`
 	DayBookingSpecifyTime interface{} `json:"day_booking_specify_time"`
 	Description           string      `json:"description"`
@@ -114,7 +113,8 @@ type Service struct {
 	SmsVerification       interface{} `json:"sms_verification"`
 	Template              interface{} `json:"template"`
 	Title                 string      `json:"title"`
-	UpdatedAt             string      `json:"updated_at"`
+	CreatedAt             time.Time   `json:"created_at"`
+	UpdatedAt             time.Time   `json:"updated_at"`
 }
 
 type serviceWrap struct {
@@ -144,12 +144,41 @@ func (c *Client) ServiceSave(svc Service) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("preparing:", string(payload))
 	buf := bytes.NewBuffer(payload)
 	bs, err := c.Do("PUT", ServiceURL+"/"+id, buf)
 	if err != nil {
 		return err
 	}
-	fmt.Println("return", string(bs))
+	if err := parseError(bs); err != nil {
+		fmt.Println("ERROR", err)
+		return err
+	}
+	return nil
+}
+
+type E struct {
+	Error struct {
+		Description string
+	}
+}
+
+func parseError(bs []byte) error {
+	e := E{}
+	err := json.Unmarshal(bs, &e)
+	if err != nil {
+		log.Fatal("error unmarshalling", err)
+		return nil
+	}
+	if len(e.Error.Description) > 0 {
+		return errors.New(e.Error.Description)
+	}
+	return nil
+}
+
+func (c *Client) ServiceCreate(svc Service) error {
+	return nil
+}
+
+func (c *Client) ServiceDelete(id int) error {
 	return nil
 }
