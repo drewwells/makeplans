@@ -92,12 +92,14 @@ var testServices = []byte(`[
 func mockServer(t *testing.T) *httptest.Server {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
-		case "/services":
+		case ServiceURL:
 			w.Write(testServices)
 		case "/services/running/slots":
 			w.Write(testSlots)
-		case "/services/running/next_available_date":
+		case "/services/320/next_available_date":
 			w.Write(testSlotNext)
+		case BookingURL:
+			w.Write(testBookings)
 		}
 	}))
 
@@ -197,7 +199,7 @@ func TestSlot_next(t *testing.T) {
 		URL: ts.URL,
 	}
 
-	slots, err := client.SlotNextDate("running")
+	slots, err := client.SlotNextDate("320")
 	if err != nil {
 		t.Error(err)
 	}
@@ -206,9 +208,51 @@ func TestSlot_next(t *testing.T) {
 		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
 			len(slots), e)
 	}
+}
 
-	if e := 1; slots[0].Free != e {
-		t.Fatalf("got: %d wanted: %d", slots[0].Free, e)
+var testBookings = []byte(`[
+    {
+        "booking": {
+            "booked_from": "2012-09-29T07:00:00+02:00",
+            "booked_to": "2012-09-29T08:00:00+02:00",
+            "created_at": "2012-09-20T15:34:16+02:00",
+            "custom_data": {},
+            "count": 1,
+            "expires_at": null,
+            "external_id": null,
+            "id": 1,
+            "notes": "Very handsome client",
+            "person_id": 1,
+            "resource_id": 1,
+            "service_id": 1,
+            "state": "confirmed",
+            "updated_at": "2012-09-20T15:34:16+02:00"
+        }
+    }
+]`)
+
+func TestBooking_list(t *testing.T) {
+	ts := mockServer(t)
+	client := Client{
+		URL: ts.URL,
+	}
+
+	books, err := client.Booking()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e := 1; len(books) != e {
+		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
+			len(books), e)
+	}
+
+	book := books[0]
+	if e := 1; book.ID != e {
+		t.Fatalf("got: %d wanted: %d", book.ID, e)
+	}
+	if e := 1; book.Count != e {
+		t.Fatalf("got: %d wanted: %d", book.ID, e)
 	}
 
 }
