@@ -11,7 +11,7 @@ type account struct {
 	Token string
 }
 
-var testList = []byte(`[
+var testServices = []byte(`[
   {
     "service": {
       "active": true,
@@ -93,7 +93,9 @@ func mockServer(t *testing.T) *httptest.Server {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
 		case "/services":
-			w.Write(testList)
+			w.Write(testServices)
+		case "/running/slots":
+			w.Write(testSlots)
 		}
 	}))
 
@@ -106,7 +108,7 @@ func init() {
 	}
 }
 
-func TestList(t *testing.T) {
+func TestService_list(t *testing.T) {
 
 	ts := mockServer(t)
 
@@ -130,6 +132,52 @@ func TestList(t *testing.T) {
 
 	if e := "Cross Fit Session"; e != svcs[0].Title {
 		t.Fatalf("got: %s wanted: %s", svcs[0].Title, e)
+	}
+
+}
+
+var testSlots = []byte(`[
+    {
+        "slot": {
+            "timestamp": "2013-03-08T10:00:00+00:00",
+            "timestamp_end": "2013-03-08T10:15:00+00:00",
+            "formatted_timestamp": "Friday, March  8, 2013, 10:00 AM",
+            "formatted_timestamp_end": "Friday, March  8, 2013, 10:15 AM",
+            "free": 1,
+            "open_resources": [
+                1
+            ],
+            "available_resources": [
+                1,2
+            ]
+        }
+    }
+]`)
+
+func TestSlot_list(t *testing.T) {
+	ts := mockServer(t)
+
+	client := Client{
+		URL: ts.URL,
+	}
+
+	slots, err := client.Slots("running")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e := 1; len(slots) != e {
+		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
+			len(slots), e)
+	}
+
+	if e := 1; slots[0].Free != e {
+		t.Fatalf("got: %d wanted: %d", slots[0].Free, e)
+	}
+
+	if e := "Friday, March  8, 2013, 10:00 AM"; e !=
+		slots[0].FormattedTimestamp {
+		t.Fatalf("got: %s wanted: %s", slots[0].FormattedTimestamp, e)
 	}
 
 }

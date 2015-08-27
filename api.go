@@ -157,3 +157,37 @@ func (c *Client) ServiceCreate(svc Service) error {
 func (c *Client) ServiceDelete(id int) error {
 	return nil
 }
+
+type Slot struct {
+	Timestamp             time.Time `json:"timestamp"`
+	TimestampEnd          time.Time `json:"timestamp_end"`
+	FormattedTimestamp    string    `json:"formatted_timestamp"`
+	FormattedTimestampEnd string    `json:"formatted_timestamp_end"`
+	Free                  int       `json:"free"`
+	OpenResources         []int     `json:"open_resources"`
+	AvailableResources    []int     `json:"available_resources"`
+}
+
+type slotWrap struct {
+	Slot Slot `json:"slot"`
+}
+
+var SlotURL = "/%s/slots" // service_id
+
+func (c *Client) Slots(service_id string) ([]Slot, error) {
+	path := fmt.Sprintf(SlotURL, service_id)
+	bs, err := c.Do("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	// unwrap data structure provided
+	wr := []slotWrap{}
+	err = json.Unmarshal(bs, &wr)
+
+	// Assign to a proper struct
+	slots := make([]Slot, len(wr))
+	for i, w := range wr {
+		slots[i] = w.Slot
+	}
+	return slots, err
+}
