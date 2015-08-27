@@ -100,6 +100,8 @@ func mockServer(t *testing.T) *httptest.Server {
 			w.Write(testSlotNext)
 		case BookingURL:
 			w.Write(testBookings)
+		case EventsURL:
+			w.Write(testEvents)
 		}
 	}))
 
@@ -253,6 +255,51 @@ func TestBooking_list(t *testing.T) {
 	}
 	if e := 1; book.Count != e {
 		t.Fatalf("got: %d wanted: %d", book.ID, e)
+	}
+
+}
+
+var testEvents = []byte(`[
+    {
+        "event": {
+            "capacity": 10,
+            "created_at": "2012-09-20T15:34:16+02:00",
+            "custom_data": {},
+            "description": null,
+            "end": "2015-08-10T11:30:00+02:00",
+            "id": 1,
+            "resource_id": 1,
+            "published": true,
+            "start": "2015-08-10T10:00:00+02:00",
+            "service_id": 1,
+            "title": "Super fun event",
+            "updated_at": "2012-09-20T15:34:16+02:00"
+        }
+    }
+]`)
+
+func TestEvent_list(t *testing.T) {
+	ts := mockServer(t)
+	client := Client{
+		URL: ts.URL,
+	}
+
+	evts, err := client.Events()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e := 1; len(evts) != e {
+		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
+			len(evts), e)
+	}
+
+	evt := evts[0]
+	if e := 1; evt.ID != e {
+		t.Fatalf("got: %d wanted: %d", evt.ID, e)
+	}
+	if e := 10; evt.Capacity != e {
+		t.Fatalf("got: %d wanted: %d", evt.Capacity, e)
 	}
 
 }
