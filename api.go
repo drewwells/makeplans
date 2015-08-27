@@ -207,8 +207,7 @@ func (c *Client) SlotNextDate(serviceID string) ([]Slot, error) {
 	layout := "2006-01-02"
 	slots := make([]Slot, len(wrap))
 	for i, w := range wrap {
-		// These appear to be JS style strings of the date. In JS calendar
-		// is 0 indexed.
+		// json can't unmarshal to ISO8601 shortform, so do it manually
 		t, _ := time.Parse(layout, w.AvailableDate)
 		t = t.AddDate(0, 1, 0)
 		slots[i].Timestamp = t
