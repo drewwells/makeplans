@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -63,7 +62,11 @@ func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) 
 		return nil, err
 	}
 	defer r.Body.Close()
-	return ioutil.ReadAll(r.Body)
+	bs, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	return bs, parseError(bs)
 }
 
 var ServiceURL = "/services"
@@ -120,15 +123,8 @@ func (c *Client) ServiceSave(svc Service) error {
 		return err
 	}
 	buf := bytes.NewBuffer(payload)
-	bs, err := c.Do("PUT", ServiceURL+"/"+id, buf)
-	if err != nil {
-		return err
-	}
-	if err := parseError(bs); err != nil {
-		fmt.Println("ERROR", err)
-		return err
-	}
-	return nil
+	_, err = c.Do("PUT", ServiceURL+"/"+id, buf)
+	return err
 }
 
 type E struct {
@@ -141,7 +137,6 @@ func parseError(bs []byte) error {
 	e := E{}
 	err := json.Unmarshal(bs, &e)
 	if err != nil {
-		log.Fatal("error unmarshalling", err)
 		return nil
 	}
 	if len(e.Error.Description) > 0 {
@@ -172,10 +167,11 @@ type slotWrap struct {
 	Slot Slot `json:"slot"`
 }
 
-var SlotURL = "/%s/slots" // service_id
+var SlotURL = "/services/%s/slots" // service_id
 
-func (c *Client) Slots(service_id string) ([]Slot, error) {
-	path := fmt.Sprintf(SlotURL, service_id)
+// Slots shows all available slots for a service
+func (c *Client) Slots(serviceID string) ([]Slot, error) {
+	path := fmt.Sprintf(SlotURL, serviceID)
 	bs, err := c.Do("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -189,5 +185,36 @@ func (c *Client) Slots(service_id string) ([]Slot, error) {
 	for i, w := range wr {
 		slots[i] = w.Slot
 	}
+	return slots, err
+}
+
+var SlotNextDateURL = "/services/%s/next_available_date" // service_id
+
+// SlotNext is the next available slot time for a specified service
+// This doesn't appear to work properly, only one service is ever returned
+func (c *Client) SlotNextDate(serviceID string) ([]Slot, error) {
+	path := fmt.Sprintf(SlotNextDateURL, serviceID)
+	bs, err := c.Do("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+	wrap := []struct {
+		AvailableDate string `json:"available_date"`
+	}{}
+	// unwrap data structure provided
+	err = json.Unmarshal(bs, &wrap)
+
+	// These appear to be JS style strings of the date. In JS calendar
+	// is 0 indexed.
+
+	layout := "2006-01-02"
+
+	slots := make([]Slot, len(wrap))
+	for i, w := range wrap {
+		t, _ := time.Parse(layout, w.AvailableDate)
+		t = t.AddDate(0, 1, 0)
+		slots[i].Timestamp = t
+	}
+
 	return slots, err
 }

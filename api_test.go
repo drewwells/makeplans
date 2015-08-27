@@ -94,8 +94,10 @@ func mockServer(t *testing.T) *httptest.Server {
 		switch r.URL.String() {
 		case "/services":
 			w.Write(testServices)
-		case "/running/slots":
+		case "/services/running/slots":
 			w.Write(testSlots)
+		case "/services/running/next_available_date":
+			w.Write(testSlotNext)
 		}
 	}))
 
@@ -178,6 +180,35 @@ func TestSlot_list(t *testing.T) {
 	if e := "Friday, March  8, 2013, 10:00 AM"; e !=
 		slots[0].FormattedTimestamp {
 		t.Fatalf("got: %s wanted: %s", slots[0].FormattedTimestamp, e)
+	}
+
+}
+
+var testSlotNext = []byte(`[
+    {
+        "available_date": "2013-04-03"
+    }
+]`)
+
+func TestSlot_next(t *testing.T) {
+	ts := mockServer(t)
+
+	client := Client{
+		URL: ts.URL,
+	}
+
+	slots, err := client.SlotNextDate("running")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if e := 1; len(slots) != e {
+		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
+			len(slots), e)
+	}
+
+	if e := 1; slots[0].Free != e {
+		t.Fatalf("got: %d wanted: %d", slots[0].Free, e)
 	}
 
 }

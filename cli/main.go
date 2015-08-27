@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"github.com/drewwells/makeplans"
 )
@@ -15,7 +16,10 @@ type account struct {
 }
 
 func main() {
-	bs, err := ioutil.ReadFile("account.json")
+	if len(os.Args) < 2 {
+		log.Fatal("must pass key file")
+	}
+	bs, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,7 +36,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("% #v\n", svcs)
+	for _, svc := range svcs {
+		fmt.Println(svc)
+	}
 
 	svc := svcs[0]
 	svc.Price = "20.0"
@@ -41,9 +47,27 @@ func main() {
 		log.Fatal(err)
 	}
 
-	svcs, _ = client.Services()
+	// get next cross fit
+	slots, err := client.SlotNextDate("393")
 	if err != nil {
-		log.Fatal(err)
+		// log.Fatal(err)
 	}
-	fmt.Printf("% #v\n", svcs[0])
+	for _, slot := range slots {
+		fmt.Println("Next running", slot)
+	}
+
+	// get next other cross fit
+	slots, err = client.SlotNextDate("394")
+	if err != nil {
+		// log.Fatal(err)
+	}
+
+	// get next running
+	slots, err = client.SlotNextDate("395")
+	if err != nil {
+		// log.Fatal(err)
+	}
+	for _, slot := range slots {
+		fmt.Println("Next running", slot)
+	}
 }
