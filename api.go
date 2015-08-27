@@ -241,8 +241,30 @@ type wrapBooking struct {
 
 var BookingURL = "/bookings"
 
+// Booking will return all active bookings
 func (c *Client) Booking() ([]Booking, error) {
 	bs, err := c.Do("GET", BookingURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	var wrap []wrapBooking
+	err = json.Unmarshal(bs, &wrap)
+	if err != nil {
+		return nil, err
+	}
+
+	books := make([]Booking, len(wrap))
+	for i, book := range wrap {
+		books[i] = book.Booking
+	}
+	return books, nil
+}
+
+var BookingAllURL = "/bookings/all"
+
+// BookingAll will return all bookings of all states (including declined, cancelled, expired and deleted
+func (c *Client) BookingAll() ([]Booking, error) {
+	bs, err := c.Do("GET", BookingAllURL, nil)
 	if err != nil {
 		return nil, err
 	}
