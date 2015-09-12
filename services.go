@@ -66,10 +66,12 @@ func (c *Client) ServiceSave(svc Service) error {
 	return err
 }
 
+// ServiceCreate creates a new service. Not all fields are required, but
+// errors are thrown if required fields are missing
 func (c *Client) ServiceCreate(new Service) (svc Service, err error) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	err = enc.Encode(serviceWrap{new}) //serviceWrap{Service: svc})
+	err = enc.Encode(serviceWrap{new})
 	if err != nil {
 		return
 	}
@@ -96,6 +98,20 @@ func (c *Client) ServiceCreate(new Service) (svc Service, err error) {
 	return
 }
 
-func (c *Client) ServiceDelete(id int) error {
-	return nil
+// ServiceDelete sets the service as inactive and it no longer appears
+// in lists.
+func (c *Client) ServiceDelete(id int) (svc Service, err error) {
+	sid := strconv.Itoa(id)
+	resp, err := c.Do("DELETE", ServiceURL+"/"+sid, nil)
+	if err != nil {
+		return
+	}
+	wrap := serviceWrap{}
+	err = json.Unmarshal(resp, &wrap)
+	if err != nil {
+		err = errors.New(string(resp))
+		return
+	}
+	svc = wrap.Service
+	return
 }

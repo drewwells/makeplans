@@ -90,7 +90,7 @@ var testServices = []byte(`[
   }
 ]`)
 
-func mockServer(t *testing.T) *httptest.Server {
+func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
 		case ServiceURL:
@@ -98,6 +98,11 @@ func mockServer(t *testing.T) *httptest.Server {
 				w.Write(testServices)
 			} else if r.Method == "POST" {
 				bs, _ := json.Marshal(mockServiceWrapCreate)
+				w.Write(bs)
+			} else if r.Method == "DELETE" {
+				del := mockServiceWrapCreate
+				del.Service.Active = false
+				bs, _ := json.Marshal(del)
 				w.Write(bs)
 			}
 		case "/services/running/slots":
@@ -111,13 +116,14 @@ func mockServer(t *testing.T) *httptest.Server {
 		}
 	}))
 
-	return ts
+	return ts, &Client{
+		URL:      ts.URL,
+		Resolver: testResolver,
+	}
 }
 
-func init() {
-	tokenURL = func(urlTmpl string, accountName string) string {
-		return urlTmpl
-	}
+var testResolver = func(urlTmpl string, accountName string) string {
+	return urlTmpl
 }
 
 var mockServiceWrapCreate = serviceWrap{
@@ -134,10 +140,8 @@ var mockServiceWrapCreate = serviceWrap{
 }
 
 func TestService_create(t *testing.T) {
-	ts := mockServer(t)
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
+
 	svc := mockServiceWrapCreate.Service
 	svc, err := client.ServiceCreate(svc)
 	if err != nil {
@@ -152,13 +156,21 @@ func TestService_create(t *testing.T) {
 	}
 }
 
+func TestService_delete(t *testing.T) {
+	client := New("fitkiq", "5fc8bcb1966cd21714c792aec9dd01f5")
+	svc, err := client.ServiceDelete(405)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e := false; svc.Active != e {
+		t.Errorf("got: %t wanted: %t", svc.Active, e)
+	}
+}
+
 func TestService_list(t *testing.T) {
 
-	ts := mockServer(t)
-
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
 
 	svcs, err := client.Services()
 	if err != nil {
@@ -199,11 +211,7 @@ var testSlots = []byte(`[
 ]`)
 
 func TestSlot_list(t *testing.T) {
-	ts := mockServer(t)
-
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
 
 	slots, err := client.Slots("running")
 	if err != nil {
@@ -233,11 +241,7 @@ var testSlotNext = []byte(`[
 ]`)
 
 func TestSlot_next(t *testing.T) {
-	ts := mockServer(t)
-
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
 
 	slots, err := client.SlotNextDate("320")
 	if err != nil {
@@ -272,10 +276,7 @@ var testBookings = []byte(`[
 ]`)
 
 func TestBooking_list(t *testing.T) {
-	ts := mockServer(t)
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
 
 	books, err := client.Booking()
 	if err != nil {
@@ -317,10 +318,7 @@ var testEvents = []byte(`[
 ]`)
 
 func TestEvent_list(t *testing.T) {
-	ts := mockServer(t)
-	client := Client{
-		URL: ts.URL,
-	}
+	_, client := mockServerClient(t)
 
 	evts, err := client.Events()
 	if err != nil {

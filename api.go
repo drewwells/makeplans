@@ -13,10 +13,17 @@ import (
 
 var DefaultURL = "https://%s.test.makeplans.net/api/v1"
 
+// DefaultResolver replaces the API url with the account name specified.
+// This can be overridden to use a different mechanism
+var DefaultResolver = func(urlTmpl string, accountName string) string {
+	return fmt.Sprintf(urlTmpl, accountName)
+}
+
 type Client struct {
 	URL         string
 	AccountName string
 	Token       string
+	Resolver    func(string, string) string
 }
 
 func New(account string, token string) *Client {
@@ -24,14 +31,7 @@ func New(account string, token string) *Client {
 		URL:         DefaultURL,
 		Token:       token,
 		AccountName: account,
-	}
-}
-
-var tokenURL func(string, string) string
-
-func init() {
-	tokenURL = func(urlTmpl string, accountName string) string {
-		return fmt.Sprintf(urlTmpl, accountName)
+		Resolver:    DefaultResolver,
 	}
 }
 
@@ -41,7 +41,7 @@ func (c *Client) do(method string, path string, body io.Reader) (*http.Response,
 	}
 	httpCli := &http.Client{Transport: tr}
 	req, err := http.NewRequest(method,
-		tokenURL(c.URL, c.AccountName)+path, body)
+		c.Resolver(c.URL, c.AccountName)+path, body)
 	if err != nil {
 		return nil, err
 	}
