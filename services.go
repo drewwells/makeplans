@@ -3,6 +3,7 @@ package makeplans
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 )
@@ -65,8 +66,34 @@ func (c *Client) ServiceSave(svc Service) error {
 	return err
 }
 
-func (c *Client) ServiceCreate(svc Service) error {
-	return nil
+func (c *Client) ServiceCreate(new Service) (svc Service, err error) {
+	var buf bytes.Buffer
+	enc := json.NewEncoder(&buf)
+	err = enc.Encode(serviceWrap{new}) //serviceWrap{Service: svc})
+	if err != nil {
+		return
+	}
+	resp, err := c.Do("POST", ServiceURL, &buf)
+	if err != nil {
+		return
+	}
+	wrap := serviceWrap{}
+	err = json.Unmarshal(resp, &wrap)
+	if err != nil {
+		// It is likely a field error has been returned,
+		// attempt to unmarshal it
+		var fe FieldError
+		err = json.Unmarshal(resp, &fe)
+		if err != nil {
+			// We tried, just give up
+			err = errors.New(string(resp))
+			return
+		}
+		err = fe
+		return
+	}
+	svc = wrap.Service
+	return
 }
 
 func (c *Client) ServiceDelete(id int) error {

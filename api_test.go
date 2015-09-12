@@ -1,6 +1,7 @@
 package makeplans
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -93,7 +94,12 @@ func mockServer(t *testing.T) *httptest.Server {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
 		case ServiceURL:
-			w.Write(testServices)
+			if r.Method == "GET" {
+				w.Write(testServices)
+			} else if r.Method == "POST" {
+				bs, _ := json.Marshal(mockServiceWrapCreate)
+				w.Write(bs)
+			}
 		case "/services/running/slots":
 			w.Write(testSlots)
 		case "/services/320/next_available_date":
@@ -111,6 +117,38 @@ func mockServer(t *testing.T) *httptest.Server {
 func init() {
 	tokenURL = func(urlTmpl string, accountName string) string {
 		return urlTmpl
+	}
+}
+
+var mockServiceWrapCreate = serviceWrap{
+	Service: Service{
+		Active:          true,
+		BookingCapacity: 1,
+		Interval:        30,
+		MaxSlots:        100,
+		Price:           "115.0",
+		SameDay:         true,
+		Title:           "Chiropractor",
+		BookingTypeID:   1,
+	},
+}
+
+func TestService_create(t *testing.T) {
+	ts := mockServer(t)
+	client := Client{
+		URL: ts.URL,
+	}
+	svc := mockServiceWrapCreate.Service
+	svc, err := client.ServiceCreate(svc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if e := true; svc.Active != e {
+		t.Errorf("got: %t wanted: %t", svc.Active, e)
+	}
+
+	if e := 1; svc.BookingTypeID != e {
+		t.Errorf("got: %d wanted: %d", svc.BookingTypeID, e)
 	}
 }
 
