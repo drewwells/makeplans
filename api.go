@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 var DefaultURL = "https://%s.test.makeplans.net/api/v1"
@@ -39,7 +40,6 @@ func (c *Client) do(method string, path string, body io.Reader) (*http.Response,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	httpCli := &http.Client{Transport: tr}
-
 	req, err := http.NewRequest(method,
 		tokenURL(c.URL, c.AccountName)+path, body)
 	if err != nil {
@@ -64,6 +64,17 @@ func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) 
 		return nil, err
 	}
 	return bs, parseError(bs)
+}
+
+type FieldError map[string][]string
+
+func (fe FieldError) Error() string {
+	var msg string
+	for field, errors := range fe {
+		msg += "field: " + field + ": " + strings.Join(errors, ", ")
+	}
+	return msg
+
 }
 
 type E struct {
