@@ -23,7 +23,9 @@ type Client struct {
 	URL         string
 	AccountName string
 	Token       string
-	Resolver    func(string, string) string
+	// annoying patch for appengine
+	Client   *http.Client
+	Resolver func(string, string) string
 }
 
 func New(account string, token string) *Client {
@@ -40,6 +42,9 @@ func (c *Client) do(method string, path string, body io.Reader) (*http.Response,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	httpCli := &http.Client{Transport: tr}
+	if c.Client != nil {
+		httpCli = c.Client
+	}
 	req, err := http.NewRequest(method,
 		c.Resolver(c.URL, c.AccountName)+path, body)
 	if err != nil {
@@ -49,7 +54,6 @@ func (c *Client) do(method string, path string, body io.Reader) (*http.Response,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.SetBasicAuth(c.Token, "")
-
 	return httpCli.Do(req)
 }
 
@@ -71,7 +75,7 @@ type FieldError map[string][]string
 func (fe FieldError) Error() string {
 	var msg string
 	for field, errors := range fe {
-		msg += "field: " + field + ": " + strings.Join(errors, ", ")
+		msg += "error " + field + ": " + strings.Join(errors, ", ")
 	}
 	return msg
 
@@ -91,6 +95,16 @@ func parseError(bs []byte) error {
 	}
 	if len(e.Error.Description) > 0 {
 		return errors.New(e.Error.Description)
+	}
+
+	// Try again with FieldError
+	var fe FieldError
+	err = json.Unmarshal(bs, &fe)
+	if err != nil {
+		return nil
+	}
+	if len(fe) > 0 {
+		return fe
 	}
 	return nil
 }

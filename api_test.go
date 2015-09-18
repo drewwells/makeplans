@@ -2,6 +2,8 @@ package makeplans
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,6 +12,19 @@ import (
 type account struct {
 	Name  string
 	Token string
+}
+
+var ac account
+
+func init() {
+	bs, err := ioutil.ReadFile("cli/account.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = json.Unmarshal(bs, &ac)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 var testServices = []byte(`[
