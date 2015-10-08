@@ -3,7 +3,6 @@ package makeplans
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -82,19 +81,34 @@ func (c *Client) Resource(id int) (Resource, error) {
 	return wp.Resource, err
 }
 
-func (c *Client) MakeResource(r Resource) error {
+func (c *Client) ResourceDelete(id int) (r Resource, err error) {
+	bs, err := c.Do("DELETE", ResourceURL+"/"+strconv.Itoa(id), nil)
+	if err != nil {
+		return
+	}
+	var wr resourceWrap
+	err = json.Unmarshal(bs, &wr)
+	r = wr.Resource
+	return
+}
+
+func (c *Client) MakeResource(r Resource) (Resource, error) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
 	err := enc.Encode(resourceWrap{r})
 	if err != nil {
-		return err
+		return Resource{}, err
 	}
 	bs, err := c.Do("POST", ResourceURL, &buf)
 	if err != nil {
-		return err
+		return Resource{}, err
 	}
-	fmt.Println(string(bs))
-	return nil
+	var wr resourceWrap
+	err = json.Unmarshal(bs, &wr)
+	if err != nil {
+		return Resource{}, err
+	}
+	return wr.Resource, nil
 }
 
 // func (c *Client) MakePerson(p Person) error {
