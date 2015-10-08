@@ -87,7 +87,12 @@ type E struct {
 	}
 }
 
+var ErrEmptyResponse = errors.New("empty response")
+
 func parseError(bs []byte) error {
+	if len(bs) == 0 {
+		return ErrEmptyResponse
+	}
 	e := E{}
 	err := json.Unmarshal(bs, &e)
 	if err != nil {

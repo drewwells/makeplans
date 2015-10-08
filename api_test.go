@@ -124,6 +124,10 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			w.Write(testSlots)
 		case "/services/320/next_available_date":
 			w.Write(testSlotNext)
+		case ResourceURL + "/":
+			w.Write(testResources)
+		case ResourceURL + "/484":
+			w.Write(testResource)
 		case BookingURL:
 			w.Write(testBookings)
 		case EventsURL:
