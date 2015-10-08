@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-var DefaultURL = "https://%s.test.makeplans.net/api/v1"
+var DefaultURL = "http://%s.test.makeplans.net/api/v1"
 
 // DefaultResolver replaces the API url with the account name specified.
 // This can be overridden to use a different mechanism
