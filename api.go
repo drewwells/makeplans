@@ -38,15 +38,19 @@ func New(account string, token string) *Client {
 }
 
 func (c *Client) do(method string, path string, body io.Reader) (*http.Response, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	httpCli := &http.Client{Transport: tr}
+	var httpCli *http.Client
+
 	if c.Client != nil {
 		httpCli = c.Client
+	} else {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		httpCli = &http.Client{Transport: tr}
 	}
-	req, err := http.NewRequest(method,
-		c.Resolver(c.URL, c.AccountName)+path, body)
+	u := c.Resolver(c.URL, c.AccountName) + path
+
+	req, err := http.NewRequest(method, u, body)
 	if err != nil {
 		return nil, err
 	}
@@ -54,6 +58,7 @@ func (c *Client) do(method string, path string, body io.Reader) (*http.Response,
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 	req.SetBasicAuth(c.Token, "")
+
 	return httpCli.Do(req)
 }
 
@@ -61,6 +66,9 @@ func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) 
 	r, err := c.do(method, path, body)
 	if err != nil {
 		return nil, err
+	}
+	if r.Body == nil {
+		return nil, nil
 	}
 	defer r.Body.Close()
 	bs, err := ioutil.ReadAll(r.Body)
