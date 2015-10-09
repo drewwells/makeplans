@@ -3,6 +3,7 @@ package makeplans
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"strconv"
 	"time"
 )
@@ -81,6 +82,26 @@ func (c *Client) Resource(id int) (Resource, error) {
 	return wp.Resource, err
 }
 
+func (c *Client) ResourceUpdate(r Resource) (Resource, error) {
+	var ret resourceWrap
+	if r.ID == 0 {
+		return ret.Resource, errors.New("id required")
+	}
+	var buf bytes.Buffer
+	req := resourceWrap{
+		Resource: r,
+	}
+	enc := json.NewEncoder(&buf)
+	enc.Encode(req)
+	bs, err := c.Do("PUT", ResourceURL+"/"+strconv.Itoa(r.ID), &buf)
+	if err != nil {
+		return ret.Resource, err
+	}
+
+	err = json.Unmarshal(bs, &ret)
+	return ret.Resource, err
+}
+
 func (c *Client) ResourceDelete(id int) (r Resource, err error) {
 	bs, err := c.Do("DELETE", ResourceURL+"/"+strconv.Itoa(id), nil)
 	if err != nil {
@@ -110,45 +131,3 @@ func (c *Client) MakeResource(r Resource) (Resource, error) {
 	}
 	return wr.Resource, nil
 }
-
-// func (c *Client) MakePerson(p Person) error {
-// 	var buf bytes.Buffer
-// 	enc := json.NewEncoder(&buf)
-// 	err := enc.Encode(personWrap{p})
-// 	if err != nil {
-// 		return err
-// 	}
-// 	bs, err := c.Do("POST", PersonURL, &buf)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	fmt.Println(string(bs))
-// 	return nil
-// }
-
-// func (c *Client) UpdatePerson(p Person) (Person, error) {
-// 	var buf bytes.Buffer
-// 	enc := json.NewEncoder(&buf)
-// 	err := enc.Encode(personWrap{p})
-// 	if err != nil {
-// 		return Person{}, err
-// 	}
-// 	if p.ID == 0 {
-// 		return Person{}, errors.New("ID is required")
-// 	}
-// 	bs, err := c.Do("PUT", PersonURL+"/"+strconv.Itoa(p.ID), &buf)
-// 	if err != nil {
-// 		return Person{}, err
-// 	}
-
-// 	var pw personWrap
-// 	err = json.Unmarshal(bs, &pw)
-// 	if err != nil {
-// 		return Person{}, err
-// 	}
-// 	return pw.Person, err
-// }
-
-// func (c *Client) DeletePerson(p Person) error {
-// 	return errors.New("not implemented https://github.com/makeplans/makeplans-api/#delete-person")
-// }

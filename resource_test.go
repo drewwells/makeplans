@@ -122,6 +122,21 @@ func TestResource_list(t *testing.T) {
 	if e := 484; ress[0].ID != e {
 		t.Errorf("got: %d wanted: %d", ress[0].ID, e)
 	}
+	up := ress[0]
+	up.OpeningHoursMon = []string{"08:00", "10:00"}
+	r, err := client.ResourceUpdate(up)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(r.OpeningHoursMon) == 0 {
+		t.Fatal("expected Mon Opening Hours")
+	}
+
+	if e := "08:00"; r.OpeningHoursMon[0] != e {
+		t.Errorf("got: %s wanted: %s", r.OpeningHoursMon[0], e)
+	}
+
 }
 
 func TestResource_get(t *testing.T) {
