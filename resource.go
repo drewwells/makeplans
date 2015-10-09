@@ -93,11 +93,11 @@ func (c *Client) ResourceUpdate(r Resource) (Resource, error) {
 	}
 	enc := json.NewEncoder(&buf)
 	enc.Encode(req)
-	bs, err := c.Do("PUT", ResourceURL+"/"+strconv.Itoa(r.ID), &buf)
+	u := ResourceURL + "/" + strconv.Itoa(r.ID)
+	bs, err := c.Do("PUT", u, &buf)
 	if err != nil {
 		return ret.Resource, err
 	}
-
 	err = json.Unmarshal(bs, &ret)
 	return ret.Resource, err
 }
