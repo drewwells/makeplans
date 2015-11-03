@@ -120,11 +120,15 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 				bs, _ := json.Marshal(del)
 				w.Write(bs)
 			}
-		case ProviderURL + "/":
+		case ProvidersURL:
 			if r.Method == "POST" {
 				w.Write(testProviderCreate)
 			} else if r.Method == "GET" {
 				w.Write(testProviders)
+			}
+		case ProvidersURL + "2044912817":
+			if r.Method == "DELETE" {
+				w.Write(testProviderDelete)
 			}
 		case "/services/running/slots":
 			w.Write(testSlots)

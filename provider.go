@@ -3,6 +3,8 @@ package makeplans
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"strconv"
 	"time"
 )
 
@@ -48,10 +50,10 @@ type providerWrap struct {
 	Provider Provider `json:"provider"`
 }
 
-var ProviderURL = "/providers"
+var ProvidersURL = "/providers/"
 
 func (c *Client) Providers() ([]Provider, error) {
-	bs, err := c.Do("GET", ProviderURL+"/", nil)
+	bs, err := c.Do("GET", ProvidersURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +75,7 @@ func (c *Client) MakeProvider(in Provider) (p Provider, err error) {
 		return
 	}
 	buf := bytes.NewBuffer(bs)
-	bs, err = c.Do("POST", ProviderURL+"/", buf)
+	bs, err = c.Do("POST", ProvidersURL, buf)
 	if err != nil {
 		return
 	}
@@ -83,10 +85,34 @@ func (c *Client) MakeProvider(in Provider) (p Provider, err error) {
 	return
 }
 
-func (c *Client) ProviderUpdate(in Provider) (Provider, error) {
-	return in, nil
+func (c *Client) ProviderUpdate(in Provider) (p Provider, err error) {
+	sid := strconv.Itoa(in.ID)
+	in.ID = 0
+	bs, err := json.Marshal(providerWrap{Provider: in})
+	if err != nil {
+		return
+	}
+	buf := bytes.NewBuffer(bs)
+	fmt.Println("put", ProvidersURL+sid)
+	bs, err = c.Do("PUT", ProvidersURL+sid, buf)
+	if err != nil {
+		return
+	}
+	fmt.Println("found", string(bs))
+	var pw providerWrap
+	err = json.Unmarshal(bs, &pw)
+	p = pw.Provider
+	return
 }
 
-func (c *Client) ProviderDelete(id int) error {
-	return nil
+func (c *Client) ProviderDelete(id int) (p Provider, err error) {
+	sid := strconv.Itoa(id)
+	bs, err := c.Do("DELETE", ProvidersURL+sid, nil)
+	if err != nil {
+		return
+	}
+	var pw providerWrap
+	err = json.Unmarshal(bs, &pw)
+	p = pw.Provider
+	return
 }
