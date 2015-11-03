@@ -121,7 +121,9 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 				w.Write(bs)
 			}
 		case ProviderURL + "/":
-			if r.Method == "GET" {
+			if r.Method == "POST" {
+				w.Write(testProviderCreate)
+			} else if r.Method == "GET" {
 				w.Write(testProviders)
 			}
 		case "/services/running/slots":

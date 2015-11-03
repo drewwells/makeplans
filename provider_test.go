@@ -60,3 +60,33 @@ func TestProvider_list(t *testing.T) {
 	}
 
 }
+
+var testProviderCreate = []byte(`{"provider":{"created_at":"2015-11-03T04:07:39-06:00","id":2044912816,"resource_id":503,"service_id":394,"updated_at":"2015-11-03T04:07:39-06:00"}}`)
+
+func TestProvider_crud(t *testing.T) {
+	_, client := mockServerClient(t)
+	in := Provider{
+		ResourceID: 503,
+		ServiceID:  394,
+	}
+	res, err := client.MakeProvider(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e := 394; res.ServiceID != e {
+		t.Errorf("got: %d wanted: %d", res.ServiceID, e)
+	}
+
+	if e := 503; res.ResourceID != e {
+		t.Errorf("got: %d wanted: %d", res.ResourceID, e)
+	}
+
+	if e := 2044912816; res.ID != e {
+		t.Errorf("got: %d wanted: %d", res.ID, e)
+	}
+
+	if res.CreatedAt.IsZero() || res.UpdatedAt.IsZero() {
+		t.Fatal("timestamp nil")
+	}
+}

@@ -1,6 +1,7 @@
 package makeplans
 
 import (
+	"bytes"
 	"encoding/json"
 	"time"
 )
@@ -64,4 +65,28 @@ func (c *Client) Providers() ([]Provider, error) {
 		ress[i] = w.Provider
 	}
 	return ress, err
+}
+
+func (c *Client) MakeProvider(in Provider) (p Provider, err error) {
+	bs, err := json.Marshal(providerWrap{Provider: in})
+	if err != nil {
+		return
+	}
+	buf := bytes.NewBuffer(bs)
+	bs, err = c.Do("POST", ProviderURL+"/", buf)
+	if err != nil {
+		return
+	}
+	var wp providerWrap
+	err = json.Unmarshal(bs, &wp)
+	p = wp.Provider
+	return
+}
+
+func (c *Client) ProviderUpdate(in Provider) (Provider, error) {
+	return in, nil
+}
+
+func (c *Client) ProviderDelete(id int) error {
+	return nil
 }
