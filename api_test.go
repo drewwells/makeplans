@@ -176,7 +176,7 @@ func TestService_create(t *testing.T) {
 }
 
 func TestService_delete(t *testing.T) {
-	client := New("fitkiq", "5fc8bcb1966cd21714c792aec9dd01f5")
+	client := New(ac.Name, ac.Token)
 	svc, err := client.ServiceDelete(405)
 	if err != nil {
 		t.Fatal(err)
