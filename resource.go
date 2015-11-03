@@ -23,6 +23,7 @@ import (
 //            "updated_at": "2012-09-20T15:34:16+02:00"
 //        }
 
+// swagger:model resource
 type Resource struct {
 	ID       int    `json:"id"`
 	Capacity int    `json:"capacity"`

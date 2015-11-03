@@ -11,27 +11,27 @@ import (
 var ServiceURL = "/services"
 
 type Service struct {
-	Active                bool        `json:"active"`
-	BookingCapacity       int         `json:"booking_capacity"`
-	BookingTypeID         int         `json:"booking_type_id"`
-	CustomData            interface{} `json:"custom_data"`
-	DayBookingSpecifyTime interface{} `json:"day_booking_specify_time"`
-	Description           string      `json:"description"`
-	HasDayBooking         bool        `json:"has_day_booking"`
-	ID                    int         `json:"id"`
-	Interval              int         `json:"interval"`
-	MailConfirmation      interface{} `json:"mail_confirmation"`
-	MailVerification      interface{} `json:"mail_verification"`
-	MaxSlots              int         `json:"max_slots"`
-	Price                 string      `json:"price"`
-	SameDay               bool        `json:"same_day"`
-	SmsConfirmation       interface{} `json:"sms_confirmation"`
-	SmsReminder           interface{} `json:"sms_reminder"`
-	SmsVerification       interface{} `json:"sms_verification"`
-	Template              interface{} `json:"template"`
-	Title                 string      `json:"title"`
-	CreatedAt             time.Time   `json:"created_at"`
-	UpdatedAt             time.Time   `json:"updated_at"`
+	Active                bool        `json:"active,omitempty"`
+	BookingCapacity       int         `json:"booking_capacity,omitempty"`
+	BookingTypeID         int         `json:"booking_type_id,omitempty"`
+	CustomData            interface{} `json:"custom_data,omitempty"`
+	DayBookingSpecifyTime interface{} `json:"day_booking_specify_time,omitempty"`
+	Description           string      `json:"description,omitempty"`
+	HasDayBooking         bool        `json:"has_day_booking,omitempty"`
+	ID                    int         `json:"id,omitempty"`
+	Interval              int         `json:"interval,omitempty"`
+	MailConfirmation      interface{} `json:"mail_confirmation,omitempty"`
+	MailVerification      interface{} `json:"mail_verification,omitempty"`
+	MaxSlots              int         `json:"max_slots,omitempty"`
+	Price                 string      `json:"price,omitempty"`
+	SameDay               bool        `json:"same_day,omitempty"`
+	SmsConfirmation       interface{} `json:"sms_confirmation,omitempty"`
+	SmsReminder           interface{} `json:"sms_reminder,omitempty"`
+	SmsVerification       interface{} `json:"sms_verification,omitempty"`
+	Template              interface{} `json:"template,omitempty"`
+	Title                 string      `json:"title,omitempty"`
+	CreatedAt             time.Time   `json:"created_at,omitempty"`
+	UpdatedAt             time.Time   `json:"updated_at,omitempty"`
 }
 
 type serviceWrap struct {
@@ -55,15 +55,18 @@ func (c *Client) Services() ([]Service, error) {
 	return svcs, err
 }
 
-func (c *Client) ServiceSave(svc Service) error {
+func (c *Client) ServiceSave(svc Service) (ret Service, err error) {
 	id := strconv.Itoa(svc.ID)
 	payload, err := json.Marshal(serviceWrap{Service: svc})
 	if err != nil {
-		return err
+		return
 	}
 	buf := bytes.NewBuffer(payload)
-	_, err = c.Do("PUT", ServiceURL+"/"+id, buf)
-	return err
+	bs, err := c.Do("PUT", ServiceURL+"/"+id, buf)
+	var wrap serviceWrap
+	err = json.Unmarshal(bs, &wrap)
+	ret = wrap.Service
+	return
 }
 
 // ServiceCreate creates a new service. Not all fields are required, but
