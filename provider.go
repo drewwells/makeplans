@@ -39,11 +39,11 @@ import (
 // ]
 
 type Provider struct {
-	ID         int       `json:"id"`
-	ServiceID  int       `json:"service_id,omitempty"`
-	ResourceID int       `json:"resource_id,omitempty"`
-	CreatedAt  time.Time `json:"updated_at,omitempty"`
-	UpdatedAt  time.Time `json:"created_at,omitempty"`
+	ID         int        `json:"id,omitempty"`
+	ServiceID  int        `json:"service_id,omitempty"`
+	ResourceID int        `json:"resource_id,omitempty"`
+	CreatedAt  *time.Time `json:"updated_at,omitempty"`
+	UpdatedAt  *time.Time `json:"created_at,omitempty"`
 }
 
 type providerWrap struct {
@@ -94,6 +94,7 @@ func (c *Client) ProviderUpdate(in Provider) (p Provider, err error) {
 	}
 	buf := bytes.NewBuffer(bs)
 	fmt.Println("put", ProvidersURL+sid)
+	fmt.Println(string(bs))
 	bs, err = c.Do("PUT", ProvidersURL+sid, buf)
 	if err != nil {
 		return

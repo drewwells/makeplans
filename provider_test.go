@@ -95,12 +95,11 @@ func TestProvider_crud(t *testing.T) {
 }
 
 func TestProvider_update(t *testing.T) {
-	t.Skip("broken")
 	client := New(ac.Name, ac.Token)
 	in := Provider{
-		ID:         2044912746,
+		ID:         2044912816,
 		ResourceID: 484,
-		ServiceID:  394,
+		ServiceID:  399,
 	}
 	res, err := client.ProviderUpdate(in)
 	if err != nil {
