@@ -120,6 +120,10 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 				bs, _ := json.Marshal(del)
 				w.Write(bs)
 			}
+		case ProviderURL + "/":
+			if r.Method == "GET" {
+				w.Write(testProviders)
+			}
 		case "/services/running/slots":
 			w.Write(testSlots)
 		case "/services/320/next_available_date":
@@ -132,7 +136,10 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			w.Write(testBookings)
 		case EventsURL:
 			w.Write(testEvents)
+		default:
+			log.Fatal("Not implemented: ", r.URL)
 		}
+
 	}))
 
 	return ts, &Client{
