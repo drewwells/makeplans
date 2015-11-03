@@ -6,11 +6,10 @@ import (
 )
 
 type Booking struct {
-	BookedFrom time.Time `json:"booked_from,omitempty"`
-	BookedTo   time.Time `json:"booked_to,omitempty"`
-	CreatedAt  time.Time `json:"created_at,omitempty"`
-	CustomData struct {
-	} `json:"custom_data,omitempty"`
+	BookedFrom time.Time   `json:"booked_from,omitempty"`
+	BookedTo   time.Time   `json:"booked_to,omitempty"`
+	CreatedAt  time.Time   `json:"created_at,omitempty"`
+	CustomData interface{} `json:"custom_data,omitempty"`
 	Count      int         `json:"count,omitempty"`
 	ExpiresAt  interface{} `json:"expires_at,omitempty"`
 	ExternalID interface{} `json:"external_id,omitempty"`
