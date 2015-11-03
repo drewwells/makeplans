@@ -7,17 +7,17 @@ import (
 
 type Event struct {
 	Capacity    int         `json:"capacity,omitempty"`
-	CreatedAt   time.Time   `json:"created_at,omitempty"`
+	CreatedAt   *time.Time  `json:"created_at,omitempty"`
 	CustomData  interface{} `json:"custom_data,omitempty"`
 	Description interface{} `json:"description,omitempty"`
-	End         time.Time   `json:"end,omitempty"`
+	End         *time.Time  `json:"end,omitempty"`
 	ID          int         `json:"id,omitempty"`
 	ResourceID  int         `json:"resource_id,omitempty"`
 	Published   bool        `json:"published,omitempty"`
-	Start       time.Time   `json:"start,omitempty"`
+	Start       *time.Time  `json:"start,omitempty"`
 	ServiceID   int         `json:"service_id,omitempty"`
 	Title       string      `json:"title,omitempty"`
-	UpdatedAt   time.Time   `json:"updated_at,omitempty"`
+	UpdatedAt   *time.Time  `json:"updated_at,omitempty"`
 }
 
 type wrapEvent struct {

@@ -40,8 +40,8 @@ type Resource struct {
 	Services   []Service   `json:"services,omitempty"`
 	CustomData interface{} `json:"custom_data,omitempty"`
 
-	CreatedAt time.Time `json:"created_at,omitempty"`
-	UpdatedAt time.Time `json:"updated_at,omitempty"`
+	CreatedAt *time.Time `json:"created_at,omitempty"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }
 
 type resourceWrap struct {

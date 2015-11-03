@@ -30,8 +30,8 @@ type Service struct {
 	SmsVerification       interface{} `json:"sms_verification,omitempty"`
 	Template              interface{} `json:"template,omitempty"`
 	Title                 string      `json:"title,omitempty"`
-	CreatedAt             time.Time   `json:"created_at,omitempty"`
-	UpdatedAt             time.Time   `json:"updated_at,omitempty"`
+	CreatedAt             *time.Time  `json:"created_at,omitempty"`
+	UpdatedAt             *time.Time  `json:"updated_at,omitempty"`
 }
 
 type serviceWrap struct {

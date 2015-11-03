@@ -6,9 +6,8 @@ import (
 )
 
 type Booking struct {
-	BookedFrom time.Time   `json:"booked_from,omitempty"`
-	BookedTo   time.Time   `json:"booked_to,omitempty"`
-	CreatedAt  time.Time   `json:"created_at,omitempty"`
+	BookedFrom *time.Time  `json:"booked_from,omitempty"`
+	BookedTo   *time.Time  `json:"booked_to,omitempty"`
 	CustomData interface{} `json:"custom_data,omitempty"`
 	Count      int         `json:"count,omitempty"`
 	ExpiresAt  interface{} `json:"expires_at,omitempty"`
@@ -19,7 +18,8 @@ type Booking struct {
 	ResourceID int         `json:"resource_id,omitempty"`
 	ServiceID  int         `json:"service_id,omitempty"`
 	State      string      `json:"state,omitempty"`
-	UpdatedAt  time.Time   `json:"updated_at,omitempty"`
+	CreatedAt  *time.Time  `json:"created_at,omitempty"`
+	UpdatedAt  *time.Time  `json:"updated_at,omitempty"`
 }
 
 type wrapBooking struct {

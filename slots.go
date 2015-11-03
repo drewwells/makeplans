@@ -7,13 +7,13 @@ import (
 )
 
 type Slot struct {
-	Timestamp             time.Time `json:"timestamp,omitempty"`
-	TimestampEnd          time.Time `json:"timestamp_end,omitempty"`
-	FormattedTimestamp    string    `json:"formatted_timestamp,omitempty"`
-	FormattedTimestampEnd string    `json:"formatted_timestamp_end,omitempty"`
-	Free                  int       `json:"free,omitempty"`
-	OpenResources         []int     `json:"open_resources,omitempty"`
-	AvailableResources    []int     `json:"available_resources,omitempty"`
+	Timestamp             *time.Time `json:"timestamp,omitempty"`
+	TimestampEnd          *time.Time `json:"timestamp_end,omitempty"`
+	FormattedTimestamp    string     `json:"formatted_timestamp,omitempty"`
+	FormattedTimestampEnd string     `json:"formatted_timestamp_end,omitempty"`
+	Free                  int        `json:"free,omitempty"`
+	OpenResources         []int      `json:"open_resources,omitempty"`
+	AvailableResources    []int      `json:"available_resources,omitempty"`
 }
 
 type slotWrap struct {
@@ -63,7 +63,7 @@ func (c *Client) SlotNextDate(serviceID string) ([]Slot, error) {
 		// json can't unmarshal to ISO8601 shortform, so do it manually
 		t, _ := time.Parse(layout, w.AvailableDate)
 		t = t.AddDate(0, 1, 0)
-		slots[i].Timestamp = t
+		slots[i].Timestamp = &t
 	}
 
 	return slots, err

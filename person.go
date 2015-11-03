@@ -11,8 +11,8 @@ import (
 
 type Person struct {
 	ID                int                    `json:"id,omitempty"`
-	CreatedAt         time.Time              `json:"created_at,omitempty"`
-	UpdatedAt         time.Time              `json:"updated_at,omitempty"`
+	CreatedAt         *time.Time             `json:"created_at,omitempty"`
+	UpdatedAt         *time.Time             `json:"updated_at,omitempty"`
 	Name              string                 `json:"name,omitempty"`
 	Email             string                 `json:"email,omitempty"`
 	PhoneNumber       string                 `json:"phonenumber,omitempty"`
