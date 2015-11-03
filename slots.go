@@ -7,13 +7,13 @@ import (
 )
 
 type Slot struct {
-	Timestamp             time.Time `json:"timestamp"`
-	TimestampEnd          time.Time `json:"timestamp_end"`
-	FormattedTimestamp    string    `json:"formatted_timestamp"`
-	FormattedTimestampEnd string    `json:"formatted_timestamp_end"`
-	Free                  int       `json:"free"`
-	OpenResources         []int     `json:"open_resources"`
-	AvailableResources    []int     `json:"available_resources"`
+	Timestamp             time.Time `json:"timestamp,omitempty"`
+	TimestampEnd          time.Time `json:"timestamp_end,omitempty"`
+	FormattedTimestamp    string    `json:"formatted_timestamp,omitempty"`
+	FormattedTimestampEnd string    `json:"formatted_timestamp_end,omitempty"`
+	Free                  int       `json:"free,omitempty"`
+	OpenResources         []int     `json:"open_resources,omitempty"`
+	AvailableResources    []int     `json:"available_resources,omitempty"`
 }
 
 type slotWrap struct {

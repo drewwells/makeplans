@@ -6,21 +6,21 @@ import (
 )
 
 type Booking struct {
-	BookedFrom time.Time `json:"booked_from"`
-	BookedTo   time.Time `json:"booked_to"`
-	CreatedAt  time.Time `json:"created_at"`
+	BookedFrom time.Time `json:"booked_from,omitempty"`
+	BookedTo   time.Time `json:"booked_to,omitempty"`
+	CreatedAt  time.Time `json:"created_at,omitempty"`
 	CustomData struct {
-	} `json:"custom_data"`
-	Count      int         `json:"count"`
-	ExpiresAt  interface{} `json:"expires_at"`
-	ExternalID interface{} `json:"external_id"`
-	ID         int         `json:"id"`
-	Notes      string      `json:"notes"`
-	PersonID   int         `json:"person_id"`
-	ResourceID int         `json:"resource_id"`
-	ServiceID  int         `json:"service_id"`
-	State      string      `json:"state"`
-	UpdatedAt  time.Time   `json:"updated_at"`
+	} `json:"custom_data,omitempty"`
+	Count      int         `json:"count,omitempty"`
+	ExpiresAt  interface{} `json:"expires_at,omitempty"`
+	ExternalID interface{} `json:"external_id,omitempty"`
+	ID         int         `json:"id,omitempty"`
+	Notes      string      `json:"notes,omitempty"`
+	PersonID   int         `json:"person_id,omitempty"`
+	ResourceID int         `json:"resource_id,omitempty"`
+	ServiceID  int         `json:"service_id,omitempty"`
+	State      string      `json:"state,omitempty"`
+	UpdatedAt  time.Time   `json:"updated_at,omitempty"`
 }
 
 type wrapBooking struct {

@@ -10,23 +10,23 @@ import (
 )
 
 type Person struct {
-	ID                int                    `json:"id"`
-	CreatedAt         time.Time              `json:"created_at"`
-	UpdatedAt         time.Time              `json:"updated_at"`
-	Name              string                 `json:"name"`
-	Email             string                 `json:"email"`
-	PhoneNumber       string                 `json:"phonenumber"`
-	PrettyPhoneNumber string                 `json:"phone_number_formatted"`
-	ExternalID        string                 `json:"external_id"`
-	CustomData        map[string]interface{} `json:"custom_data"`
-	DOB               string                 `json:"date_of_birth"`
-	NationalID        string                 `json:"national_id_no"`
-	Street            string                 `json:"street"`
-	City              string                 `json:"city"`
-	PostalCode        string                 `json:"postal_code"`
-	State             string                 `json:"state"`
-	CountryCode       string                 `json:"country_code"`
-	Notes             string                 `json:"notes"`
+	ID                int                    `json:"id,omitempty"`
+	CreatedAt         time.Time              `json:"created_at,omitempty"`
+	UpdatedAt         time.Time              `json:"updated_at,omitempty"`
+	Name              string                 `json:"name,omitempty"`
+	Email             string                 `json:"email,omitempty"`
+	PhoneNumber       string                 `json:"phonenumber,omitempty"`
+	PrettyPhoneNumber string                 `json:"phone_number_formatted,omitempty"`
+	ExternalID        string                 `json:"external_id,omitempty"`
+	CustomData        map[string]interface{} `json:"custom_data,omitempty"`
+	DOB               string                 `json:"date_of_birth,omitempty,omitempty"`
+	NationalID        string                 `json:"national_id_no,omitempty"`
+	Street            string                 `json:"street,omitempty"`
+	City              string                 `json:"city,omitempty"`
+	PostalCode        string                 `json:"postal_code,omitempty"`
+	State             string                 `json:"state,omitempty"`
+	CountryCode       string                 `json:"country_code,omitempty"`
+	Notes             string                 `json:"notes,omitempty"`
 }
 
 type personWrap struct {

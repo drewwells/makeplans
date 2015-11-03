@@ -6,18 +6,18 @@ import (
 )
 
 type Event struct {
-	Capacity    int         `json:"capacity"`
-	CreatedAt   time.Time   `json:"created_at"`
-	CustomData  interface{} `json:"custom_data"`
-	Description interface{} `json:"description"`
-	End         time.Time   `json:"end"`
-	ID          int         `json:"id"`
-	ResourceID  int         `json:"resource_id"`
-	Published   bool        `json:"published"`
-	Start       time.Time   `json:"start"`
-	ServiceID   int         `json:"service_id"`
-	Title       string      `json:"title"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+	Capacity    int         `json:"capacity,omitempty"`
+	CreatedAt   time.Time   `json:"created_at,omitempty"`
+	CustomData  interface{} `json:"custom_data,omitempty"`
+	Description interface{} `json:"description,omitempty"`
+	End         time.Time   `json:"end,omitempty"`
+	ID          int         `json:"id,omitempty"`
+	ResourceID  int         `json:"resource_id,omitempty"`
+	Published   bool        `json:"published,omitempty"`
+	Start       time.Time   `json:"start,omitempty"`
+	ServiceID   int         `json:"service_id,omitempty"`
+	Title       string      `json:"title,omitempty"`
+	UpdatedAt   time.Time   `json:"updated_at,omitempty"`
 }
 
 type wrapEvent struct {

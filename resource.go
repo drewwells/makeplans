@@ -25,23 +25,23 @@ import (
 
 // swagger:model resource
 type Resource struct {
-	ID       int    `json:"id"`
-	Capacity int    `json:"capacity"`
-	Title    string `json:"title"`
+	ID       int    `json:"id,omitempty"`
+	Capacity int    `json:"capacity,omitempty"`
+	Title    string `json:"title,omitempty"`
 
-	OpeningHoursMon []string `json:"opening_hours_mon"`
-	OpeningHoursTue []string `json:"opening_hours_tue"`
-	OpeningHoursWed []string `json:"opening_hours_wed"`
-	OpeningHoursThu []string `json:"opening_hours_thu"`
-	OpeningHoursFri []string `json:"opening_hours_fri"`
-	OpeningHoursSat []string `json:"opening_hours_sat"`
-	OpeningHoursSun []string `json:"opening_hours_sun"`
+	OpeningHoursMon []string `json:"opening_hours_mon,omitempty"`
+	OpeningHoursTue []string `json:"opening_hours_tue,omitempty"`
+	OpeningHoursWed []string `json:"opening_hours_wed,omitempty"`
+	OpeningHoursThu []string `json:"opening_hours_thu,omitempty"`
+	OpeningHoursFri []string `json:"opening_hours_fri,omitempty"`
+	OpeningHoursSat []string `json:"opening_hours_sat,omitempty"`
+	OpeningHoursSun []string `json:"opening_hours_sun,omitempty"`
 
-	Services   []Service   `json:"services"`
-	CustomData interface{} `json:"custom_data"`
+	Services   []Service   `json:"services,omitempty"`
+	CustomData interface{} `json:"custom_data,omitempty"`
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 type resourceWrap struct {
