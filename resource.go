@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -81,6 +82,16 @@ func (c *Client) Resource(id int) (Resource, error) {
 	}
 
 	return wp.Resource, err
+}
+
+func (c *Client) ResourceOpening(id int, from time.Time, to time.Time) {
+	// Mon Jan 2 15:04:05 -0700 MST 2006
+	layout := "2006-01-02"
+	f := from.Format(layout)
+	t := to.Format(layout)
+	bs, err := c.Do("GET", ResourceURL+"/"+strconv.Itoa(id)+"?from="+
+		f+"&to="+t, nil)
+	fmt.Println(string(bs), err)
 }
 
 func (c *Client) ResourceUpdate(r Resource) (Resource, error) {
