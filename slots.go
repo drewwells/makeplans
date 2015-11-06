@@ -10,7 +10,6 @@ import (
 // Slot describes an available time for a booking. It combines a trainer
 // with the service they provide so a booking can be made.
 //
-// swagger:model Slot
 type Slot struct {
 	Timestamp             *time.Time `json:"timestamp,omitempty"`
 	TimestampEnd          *time.Time `json:"timestamp_end,omitempty"`
