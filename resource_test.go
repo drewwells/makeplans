@@ -1,6 +1,9 @@
 package makeplans
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 var testResources = []byte(`[{"resource":{"capacity":4,"created_at":"2015-08-27T00:53:53-05:00","custom_data":{},"id":484,"opening_hours_fri":["08:00","20:00"],"opening_hours_mon":["08:00","20:00"],"opening_hours_sat":null,"opening_hours_sun":null,"opening_hours_thu":["08:00","20:00"],"opening_hours_tue":["08:00","20:00"],"opening_hours_wed":["08:00","20:00"],"title":"Calendar","updated_at":"2015-09-11T22:21:08-05:00","open_0":"08:00","close_0":"20:00","open_1":"08:00","close_1":"20:00","open_2":"08:00","close_2":"20:00","open_3":"08:00","close_3":"20:00","open_4":"08:00","close_4":"20:00","open_5":null,"close_5":null,"open_6":null,"close_6":null}}]`)
 
@@ -158,4 +161,13 @@ func TestResource_get(t *testing.T) {
 	if err != ErrEmptyResponse {
 		t.Errorf("invalid error returnd: %s", err)
 	}
+}
+
+func TestResource_opening(t *testing.T) {
+	client := New(ac.Name, ac.Token)
+	to, err := time.Parse("2006-01-02", "2015-08-01")
+	if err != nil {
+		t.Fatal(err)
+	}
+	client.ResourceOpening(501, time.Now(), to)
 }

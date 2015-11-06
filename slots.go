@@ -3,9 +3,14 @@ package makeplans
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"time"
 )
 
+// Slot describes an available time for a booking. It combines a trainer
+// with the service they provide so a booking can be made.
+//
+// swagger:model Slot
 type Slot struct {
 	Timestamp             *time.Time `json:"timestamp,omitempty"`
 	TimestampEnd          *time.Time `json:"timestamp_end,omitempty"`
@@ -22,17 +27,24 @@ type slotWrap struct {
 
 var SlotURL = "/services/%s/slots" // service_id
 
-// Slots shows all available slots for a service
-func (c *Client) Slots(serviceID string) ([]Slot, error) {
+// ServiceSlot shows all available slots for a service
+func (c *Client) ServiceSlot(serviceID string, from, to time.Time) ([]Slot, error) {
 	path := fmt.Sprintf(SlotURL, serviceID)
-	bs, err := c.Do("GET", path, nil)
+	v := url.Values{}
+	layout := "2006-01-02"
+	if !from.IsZero() {
+		v.Set("from", from.Format(layout))
+	}
+	if !from.IsZero() {
+		v.Set("to", to.Format(layout))
+	}
+	bs, err := c.Do("GET", path+"?"+v.Encode(), nil)
 	if err != nil {
 		return nil, err
 	}
 	// unwrap data structure provided
 	wr := []slotWrap{}
 	err = json.Unmarshal(bs, &wr)
-
 	// Assign to a proper struct
 	slots := make([]Slot, len(wr))
 	for i, w := range wr {

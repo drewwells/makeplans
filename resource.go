@@ -24,7 +24,9 @@ import (
 //            "updated_at": "2012-09-20T15:34:16+02:00"
 //        }
 
-// swagger:model resource
+// Resource is the makeplans description of a trainer
+//
+// swagger:model Resource
 type Resource struct {
 	ID       int    `json:"id,omitempty"`
 	Capacity int    `json:"capacity,omitempty"`

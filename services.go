@@ -11,6 +11,7 @@ import (
 var ServiceURL = "/services"
 
 type Service struct {
+	ID                    int         `json:"id,omitempty"`
 	Active                bool        `json:"active,omitempty"`
 	BookingCapacity       int         `json:"booking_capacity,omitempty"`
 	BookingTypeID         int         `json:"booking_type_id,omitempty"`
@@ -18,7 +19,6 @@ type Service struct {
 	DayBookingSpecifyTime interface{} `json:"day_booking_specify_time,omitempty"`
 	Description           string      `json:"description,omitempty"`
 	HasDayBooking         bool        `json:"has_day_booking,omitempty"`
-	ID                    int         `json:"id,omitempty"`
 	Interval              int         `json:"interval,omitempty"`
 	MailConfirmation      interface{} `json:"mail_confirmation,omitempty"`
 	MailVerification      interface{} `json:"mail_verification,omitempty"`
