@@ -107,7 +107,14 @@ func parseError(bs []byte) error {
 		return nil
 	}
 	if len(e.Error.Description) > 0 {
-		return errors.New(e.Error.Description)
+		// Produce real errors for known http errors
+		desc := e.Error.Description
+		switch desc {
+		case ErrBookingCapacityLimit.Error():
+			return ErrBookingCapacityLimit
+		default:
+			return errors.New(e.Error.Description)
+		}
 	}
 
 	// Try again with FieldError

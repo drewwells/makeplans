@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 )
 
 type account struct {
@@ -107,7 +108,7 @@ var testServices = []byte(`[
 
 func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.String() {
+		switch r.URL.Path {
 		case ServiceURL:
 			if r.Method == "GET" {
 				w.Write(testServices)
@@ -139,11 +140,21 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 		case ResourceURL + "/484":
 			w.Write(testResource)
 		case BookingURL:
-			w.Write(testBookings)
+			switch r.Method {
+			case "POST":
+				// Inject bad request if 400 is detected
+				if fakeBookingCapacityFailure {
+					w.Write([]byte(`{"error":{"description":"error resource_id: Not available for booking at this timeerror count: More than maximum count per booking"}}`))
+				} else {
+					w.Write(testBookingSuccess)
+				}
+			case "GET":
+				w.Write(testBookings)
+			}
 		case EventsURL:
 			w.Write(testEvents)
 		default:
-			log.Fatal("Not implemented: ", r.URL)
+			panic("Not implemented: " + r.URL.String())
 		}
 
 	}))
@@ -245,7 +256,7 @@ var testSlots = []byte(`[
 func TestSlot_list(t *testing.T) {
 	_, client := mockServerClient(t)
 
-	slots, err := client.Slots("running")
+	slots, err := client.ServiceSlot("running", time.Now(), time.Now())
 	if err != nil {
 		t.Error(err)
 	}
@@ -284,50 +295,6 @@ func TestSlot_next(t *testing.T) {
 		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
 			len(slots), e)
 	}
-}
-
-var testBookings = []byte(`[
-    {
-        "booking": {
-            "booked_from": "2012-09-29T07:00:00+02:00",
-            "booked_to": "2012-09-29T08:00:00+02:00",
-            "created_at": "2012-09-20T15:34:16+02:00",
-            "custom_data": {},
-            "count": 1,
-            "expires_at": null,
-            "external_id": null,
-            "id": 1,
-            "notes": "Very handsome client",
-            "person_id": 1,
-            "resource_id": 1,
-            "service_id": 1,
-            "state": "confirmed",
-            "updated_at": "2012-09-20T15:34:16+02:00"
-        }
-    }
-]`)
-
-func TestBooking_list(t *testing.T) {
-	_, client := mockServerClient(t)
-
-	books, err := client.Booking()
-	if err != nil {
-		t.Error(err)
-	}
-
-	if e := 1; len(books) != e {
-		t.Fatalf("wrong number of slots returned got: %d wanted: %d",
-			len(books), e)
-	}
-
-	book := books[0]
-	if e := 1; book.ID != e {
-		t.Fatalf("got: %d wanted: %d", book.ID, e)
-	}
-	if e := 1; book.Count != e {
-		t.Fatalf("got: %d wanted: %d", book.ID, e)
-	}
-
 }
 
 var testEvents = []byte(`[
