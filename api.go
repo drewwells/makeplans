@@ -95,7 +95,12 @@ type E struct {
 	}
 }
 
-var ErrEmptyResponse = errors.New("empty response")
+var (
+	// ErrNotFound is a generic error returned by Makeplans. It sometimes
+	// indicates an ID is invalid.
+	ErrNotFound      = errors.New("Not found")
+	ErrEmptyResponse = errors.New("empty response")
+)
 
 func parseError(bs []byte) error {
 	if len(bs) == 0 {
@@ -112,7 +117,10 @@ func parseError(bs []byte) error {
 		switch desc {
 		case ErrBookingCapacityLimit.Error():
 			return ErrBookingCapacityLimit
+		case ErrNotFound.Error():
+			return ErrNotFound
 		default:
+			fmt.Println("default error", e.Error.Description)
 			return errors.New(e.Error.Description)
 		}
 	}

@@ -2,6 +2,7 @@ package makeplans
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,6 +18,8 @@ type account struct {
 
 var ac account
 
+var realClient *Client
+
 func init() {
 	bs, err := ioutil.ReadFile("cli/account.json")
 	if err != nil {
@@ -26,6 +29,7 @@ func init() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	realClient = New(ac.Name, ac.Token)
 }
 
 var testServices = []byte(`[
@@ -106,9 +110,14 @@ var testServices = []byte(`[
   }
 ]`)
 
+func apiError(err error) []byte {
+	return []byte(fmt.Sprintf(`{"error":{"description":"%s"}}`,
+		err.Error()))
+}
+
 func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		switch r.URL.Path {
+		switch r.URL.String() {
 		case ServiceURL:
 			if r.Method == "GET" {
 				w.Write(testServices)
@@ -131,14 +140,18 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			if r.Method == "DELETE" {
 				w.Write(testProviderDelete)
 			}
-		case "/services/running/slots":
+		case "/services/running/slots?from=2015-11-07&to=2015-11-07":
 			w.Write(testSlots)
 		case "/services/320/next_available_date":
 			w.Write(testSlotNext)
+		case "/resources/501?from=2015-11-07&to=2015-08-01":
+			w.Write(resourceOpeningResponse)
 		case ResourceURL + "/":
 			w.Write(testResources)
 		case ResourceURL + "/484":
 			w.Write(testResource)
+		case ResourceURL + "/100":
+			w.Write(apiError(ErrNotFound))
 		case BookingURL:
 			switch r.Method {
 			case "POST":

@@ -158,16 +158,31 @@ func TestResource_get(t *testing.T) {
 		t.Fatal("expected err")
 	}
 
-	if err != ErrEmptyResponse {
-		t.Errorf("invalid error returnd: %s", err)
+	if err != ErrNotFound {
+		t.Errorf("invalid error returned: %s", err)
 	}
 }
 
+var resourceOpeningResponse = []byte(`{"resource":{"capacity":1,"created_at":"2015-10-08T10:45:25-05:00","custom_data":{},"id":501,"opening_hours_fri":["12:00","14:00"],"opening_hours_mon":["12:00","14:00"],"opening_hours_sat":["12:00","14:00"],"opening_hours_sun":["12:00","14:00"],"opening_hours_thu":["12:00","14:00"],"opening_hours_tue":["12:00","14:00"],"opening_hours_wed":["12:00","14:00"],"title":"joe bob","updated_at":"2015-11-06T07:42:02-06:00","open_0":"12:00","close_0":"14:00","open_1":"12:00","close_1":"14:00","open_2":"12:00","close_2":"14:00","open_3":"12:00","close_3":"14:00","open_4":"12:00","close_4":"14:00","open_5":"12:00","close_5":"14:00","open_6":"12:00","close_6":"14:00","services":[{"active":true,"booking_capacity":10,"booking_type_id":1,"created_at":"2015-08-23T19:00:07-05:00","custom_data":{},"day_booking_specify_time":null,"description":"This is a cross fit type","has_day_booking":false,"id":394,"interval":60,"mail_confirmation":null,"mail_verification":null,"max_slots":75,"price":"20.0","same_day":false,"sms_confirmation":null,"sms_reminder":null,"sms_verification":null,"template":null,"title":"Cross Fit Type","updated_at":"2015-11-07T08:59:29-06:00"}]}}`)
+
 func TestResource_opening(t *testing.T) {
-	client := New(ac.Name, ac.Token)
+	_, client := mockServerClient(t)
 	to, err := time.Parse("2006-01-02", "2015-08-01")
 	if err != nil {
 		t.Fatal(err)
 	}
-	client.ResourceOpening(501, time.Now(), to)
+	e := 501
+	rsc, err := client.ResourceOpening(e, time.Now(), to)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if rsc.ID != e {
+		t.Errorf("got: %d wanted: %d", rsc.ID, e)
+
+	}
+
+	if e := 1; len(rsc.Services) != e {
+		t.Errorf("got: %d wanted: %d", len(rsc.Services), e)
+	}
 }

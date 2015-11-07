@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -76,7 +75,6 @@ func (c *Client) Resource(id int) (Resource, error) {
 	if err != nil {
 		return Resource{}, err
 	}
-
 	var wp resourceWrap
 	err = json.Unmarshal(bs, &wp)
 	if err != nil {
@@ -86,14 +84,17 @@ func (c *Client) Resource(id int) (Resource, error) {
 	return wp.Resource, err
 }
 
-func (c *Client) ResourceOpening(id int, from time.Time, to time.Time) {
+func (c *Client) ResourceOpening(id int, from time.Time, to time.Time) (ret Resource, err error) {
 	// Mon Jan 2 15:04:05 -0700 MST 2006
 	layout := "2006-01-02"
 	f := from.Format(layout)
 	t := to.Format(layout)
-	bs, err := c.Do("GET", ResourceURL+"/"+strconv.Itoa(id)+"?from="+
-		f+"&to="+t, nil)
-	fmt.Println(string(bs), err)
+	bs, err := c.Do("GET", ResourceURL+"/"+strconv.Itoa(id)+
+		"?from="+f+"&to="+t, nil)
+	var wrap resourceWrap
+	err = json.Unmarshal(bs, &wrap)
+	ret = wrap.Resource
+	return
 }
 
 func (c *Client) ResourceUpdate(r Resource) (Resource, error) {
