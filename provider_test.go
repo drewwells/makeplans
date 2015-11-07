@@ -95,6 +95,7 @@ func TestProvider_crud(t *testing.T) {
 }
 
 func TestProvider_update(t *testing.T) {
+	t.Skip("")
 	client := New(ac.Name, ac.Token)
 	in := Provider{
 		ID:         2044912816,

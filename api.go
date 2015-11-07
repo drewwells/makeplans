@@ -85,8 +85,8 @@ func (fe FieldError) Error() string {
 	for field, errors := range fe {
 		msg += "error " + field + ": " + strings.Join(errors, ", ")
 	}
-	return msg
 
+	return msg
 }
 
 type E struct {
@@ -100,6 +100,9 @@ var (
 	// indicates an ID is invalid.
 	ErrNotFound      = errors.New("Not found")
 	ErrEmptyResponse = errors.New("empty response")
+
+	// ErrEmailTaken indicates the person already exists
+	ErrEmailTaken = errors.New("error email: has already been taken")
 )
 
 func parseError(bs []byte) error {
@@ -115,6 +118,8 @@ func parseError(bs []byte) error {
 		// Produce real errors for known http errors
 		desc := e.Error.Description
 		switch desc {
+		case ErrEmailTaken.Error():
+			return ErrEmailTaken
 		case ErrBookingCapacityLimit.Error():
 			return ErrBookingCapacityLimit
 		case ErrNotFound.Error():
@@ -131,6 +136,14 @@ func parseError(bs []byte) error {
 	if err != nil {
 		return nil
 	}
+
+	// FIXME: this is weird, there's a better way to report up errors
+	if msgs, ok := fe["email"]; ok {
+		if len(msgs) == 1 && "error email: "+msgs[0] == ErrEmailTaken.Error() {
+			return ErrEmailTaken
+		}
+	}
+
 	if len(fe) > 0 {
 		return fe
 	}

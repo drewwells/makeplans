@@ -118,6 +118,28 @@ func apiError(err error) []byte {
 func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
+		case PersonURL:
+			switch r.Method {
+			case "GET":
+				w.Write(peopleResponse)
+			case "POST":
+				w.Write(personResponse)
+			}
+		case PersonURL + "12380":
+			switch r.Method {
+			case "PUT":
+				w.Write(personResponse)
+			}
+		case ProvidersURL:
+			if r.Method == "POST" {
+				w.Write(testProviderCreate)
+			} else if r.Method == "GET" {
+				w.Write(testProviders)
+			}
+		case ProvidersURL + "2044912817":
+			if r.Method == "DELETE" {
+				w.Write(testProviderDelete)
+			}
 		case ServiceURL:
 			if r.Method == "GET" {
 				w.Write(testServices)
@@ -130,20 +152,10 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 				bs, _ := json.Marshal(del)
 				w.Write(bs)
 			}
-		case ProvidersURL:
-			if r.Method == "POST" {
-				w.Write(testProviderCreate)
-			} else if r.Method == "GET" {
-				w.Write(testProviders)
-			}
-		case ProvidersURL + "2044912817":
-			if r.Method == "DELETE" {
-				w.Write(testProviderDelete)
-			}
-		case "/services/running/slots?from=2015-11-07&to=2015-11-07":
-			w.Write(testSlots)
 		case "/services/320/next_available_date":
 			w.Write(testSlotNext)
+		case "/services/running/slots?from=2015-11-07&to=2015-11-07":
+			w.Write(testSlots)
 		case "/resources/501?from=2015-11-07&to=2015-08-01":
 			w.Write(resourceOpeningResponse)
 		case ResourceURL + "/":
@@ -167,7 +179,9 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 		case EventsURL:
 			w.Write(testEvents)
 		default:
-			panic("Not implemented: " + r.URL.String())
+			pan := fmt.Sprintf("Not implemented %s: %s", r.Method,
+				r.URL.String())
+			panic(pan)
 		}
 
 	}))

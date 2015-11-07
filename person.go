@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -33,10 +32,11 @@ type personWrap struct {
 	Person Person `json:"person"`
 }
 
-var PersonURL = "/people"
+// PersonURL is the base path for people endpoints
+var PersonURL = "/people/"
 
 func (c *Client) People() ([]Person, error) {
-	bs, err := c.Do("GET", PersonURL+"/", nil)
+	bs, err := c.Do("GET", PersonURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -52,19 +52,22 @@ func (c *Client) People() ([]Person, error) {
 	return ppl, err
 }
 
-func (c *Client) MakePerson(p Person) error {
+func (c *Client) MakePerson(p Person) (ret Person, err error) {
 	var buf bytes.Buffer
 	enc := json.NewEncoder(&buf)
-	err := enc.Encode(personWrap{p})
+	err = enc.Encode(personWrap{p})
 	if err != nil {
-		return err
+		return
 	}
 	bs, err := c.Do("POST", PersonURL, &buf)
 	if err != nil {
-		return err
+		return
 	}
-	fmt.Println(string(bs))
-	return nil
+
+	var wrap personWrap
+	err = json.Unmarshal(bs, &wrap)
+	ret = wrap.Person
+	return
 }
 
 func (c *Client) UpdatePerson(p Person) (Person, error) {
@@ -77,7 +80,7 @@ func (c *Client) UpdatePerson(p Person) (Person, error) {
 	if p.ID == 0 {
 		return Person{}, errors.New("ID is required")
 	}
-	bs, err := c.Do("PUT", PersonURL+"/"+strconv.Itoa(p.ID), &buf)
+	bs, err := c.Do("PUT", PersonURL+strconv.Itoa(p.ID), &buf)
 	if err != nil {
 		return Person{}, err
 	}
