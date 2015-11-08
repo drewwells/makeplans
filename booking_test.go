@@ -54,20 +54,11 @@ var testBookingSuccess = []byte(`{"booking":{"booked_from":"2015-11-10T08:00:00-
 var fakeBookingCapacityFailure bool
 
 func TestBooking_create(t *testing.T) {
-	// client := New(ac.Name, ac.Token)
-	_, client := mockServerClient(t)
+	client := realClient
+	// _, client := mockServerClient(t)
 
-	// "timestamp": "2015-11-10T08:00:00-06:00",
-	//         "timestamp_end": "2015-11-10T09:00:00-06:00",
-	//         "formatted_timestamp": "Tuesday, November 10, 2015, 8:00 AM",
-	//         "formatted_timestamp_end": "Tuesday, November 10, 2015, 9:00 AM",
-	//         "free": 4,
-	//         "available_resources": [
-	//             484
-	//         ]
-
-	start, _ := time.Parse(time.RFC3339, "2015-11-10T08:00:00-06:00")
-	stop, _ := time.Parse(time.RFC3339, "2015-11-10T09:00:00-06:00")
+	start, _ := time.Parse(time.RFC3339, "2015-11-10T12:00:00-06:00")
+	stop, _ := time.Parse(time.RFC3339, "2015-11-10T13:00:00-06:00")
 
 	book, err := client.MakeBooking(Booking{
 		// TBD "external_id": null,
@@ -75,7 +66,12 @@ func TestBooking_create(t *testing.T) {
 		// PersonID:   1,
 		ResourceID: 484,
 		ServiceID:  394,
-		Count:      100,
+		Count:      1,
+		CustomData: map[string]interface{}{
+			"poop":   "shoot",
+			"number": 5,
+			"slice":  []string{"a", "b", "c"},
+		},
 		BookedFrom: &start,
 		BookedTo:   &stop,
 		State:      "confirmed",
@@ -87,6 +83,7 @@ func TestBooking_create(t *testing.T) {
 	if book.ID == 0 {
 		t.Errorf("unexpected nil book: % #v\n", book)
 	}
+	return
 
 	fakeBookingCapacityFailure = true
 	defer func() { fakeBookingCapacityFailure = false }()
@@ -108,5 +105,26 @@ func TestBooking_create(t *testing.T) {
 
 	if book.ID != 0 {
 		t.Fatal("expected nil Booking")
+	}
+}
+
+var bookingDeleteResponse = []byte(`{"booking":{"booked_from":"2015-11-10T08:00:00-06:00","booked_to":"2015-11-10T09:00:00-06:00","collection_id":null,"count":1,"created_at":"2015-11-07T08:59:57-06:00","custom_data":{},"event_id":null,"expires_at":null,"external_id":null,"id":410369,"notes":"Very handsome client","person_id":null,"resource_id":484,"service_id":394,"state":"deleted","updated_at":"2015-11-08T10:14:54-06:00","resource":{"id":484,"title":"Calendar"},"service":{"id":394,"title":"Cross Fit Type"}}}`)
+
+func TestBooking_delete(t *testing.T) {
+	// TODO: repeated delete error
+	// {"state":["cannot transition via \"remove\""]}
+	_, client := mockServerClient(t)
+	id := 410369
+	book, err := client.BookingDelete(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e := 484; book.ResourceID != e {
+		t.Errorf("got: %d wanted: %d", book.ResourceID, e)
+	}
+
+	if e := id; book.ID != e {
+		t.Errorf("got: %d wanted: %d", book.ID, e)
 	}
 }

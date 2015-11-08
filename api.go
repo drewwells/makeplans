@@ -75,6 +75,7 @@ func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
+	// FIXME: parseError should happen AFTER endpoints attempt to unmarshal
 	return bs, parseError(bs)
 }
 
@@ -82,7 +83,12 @@ type FieldError map[string][]string
 
 func (fe FieldError) Error() string {
 	var msg string
+	virgin := true
 	for field, errors := range fe {
+		if !virgin {
+			msg += "\n"
+		}
+		virgin = false
 		msg += "error " + field + ": " + strings.Join(errors, ", ")
 	}
 
@@ -129,6 +135,12 @@ func parseError(bs []byte) error {
 			return errors.New(e.Error.Description)
 		}
 	}
+
+	// False positive error
+	// if fal := `{"resource_id":["can't be blank"],"count":["More than maximum count per booking"]}`; fal == string(bs) {
+	// 	log.Println("bypassed false error")
+	// 	return nil
+	// }
 
 	// Try again with FieldError
 	var fe FieldError

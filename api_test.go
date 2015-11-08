@@ -118,6 +118,11 @@ func apiError(err error) []byte {
 func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.String() {
+		case BookingURL + "410369":
+			switch r.Method {
+			case "DELETE":
+				w.Write(bookingDeleteResponse)
+			}
 		case PersonURL:
 			switch r.Method {
 			case "GET":
