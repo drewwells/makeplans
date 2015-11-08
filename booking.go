@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 )
@@ -104,6 +105,14 @@ func (c *Client) mutateBooking(action string, id int) (ret Booking, err error) {
 		bs, err = c.Do("DELETE", BookingURL+sid, nil)
 	case "cancel":
 		bs, err = c.Do("PUT", BookingURL+sid+"/cancel", nil)
+	case "verify":
+		bs, err = c.Do("PUT", BookingURL+sid+"/verify", nil)
+	case "confirm":
+		bs, err = c.Do("PUT", BookingURL+sid+"/confirm", nil)
+	case "decline":
+		bs, err = c.Do("PUT", BookingURL+sid+"/decline", nil)
+	default:
+		err = fmt.Errorf("action %s not implemented", action)
 	}
 	if err != nil {
 		return
@@ -120,4 +129,16 @@ func (c *Client) BookingDelete(id int) (Booking, error) {
 
 func (c *Client) BookingCancel(id int) (Booking, error) {
 	return c.mutateBooking("cancel", id)
+}
+
+func (c *Client) BookingVerify(id int) (Booking, error) {
+	return c.mutateBooking("verify", id)
+}
+
+func (c *Client) BookingConfirm(id int) (Booking, error) {
+	return c.mutateBooking("confirm", id)
+}
+
+func (c *Client) BookingDecline(id int) (Booking, error) {
+	return c.mutateBooking("decline", id)
 }
