@@ -128,3 +128,27 @@ func TestBooking_delete(t *testing.T) {
 		t.Errorf("got: %d wanted: %d", book.ID, e)
 	}
 }
+
+var bookingCancelResponse = []byte(`{"booking":{"custom_data":{"number":"5","poop":"shoot","slice":"[\"a\", \"b\", \"c\"]"},"count":1,"id":410369,"notes":"Very handsome client","resource_id":484,"service_id":394,"state":"cancelled"}}`)
+
+func TestBooking_cancel(t *testing.T) {
+	_, client := mockServerClient(t)
+	id := 410369
+	book, err := client.BookingCancel(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if e := 484; book.ResourceID != e {
+		t.Errorf("got: %d wanted: %d", book.ResourceID, e)
+	}
+
+	if e := id; book.ID != e {
+		t.Errorf("got: %d wanted: %d", book.ID, e)
+	}
+
+	if e := "cancelled"; book.State != e {
+		t.Errorf("got: %s wanted: %s", book.State, e)
+	}
+
+}

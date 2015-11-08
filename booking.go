@@ -96,15 +96,28 @@ func (c *Client) MakeBooking(b Booking) (ret Booking, err error) {
 	return
 }
 
-func (c *Client) BookingDelete(id int) (ret Booking, err error) {
+func (c *Client) mutateBooking(action string, id int) (ret Booking, err error) {
+	var bs []byte
 	sid := strconv.Itoa(id)
-	bs, err := c.Do("DELETE", BookingURL+sid, nil)
+	switch action {
+	case "delete":
+		bs, err = c.Do("DELETE", BookingURL+sid, nil)
+	case "cancel":
+		bs, err = c.Do("PUT", BookingURL+sid+"/cancel", nil)
+	}
 	if err != nil {
 		return
 	}
-
 	wrap := wrapBooking{}
 	err = json.Unmarshal(bs, &wrap)
 	ret = wrap.Booking
 	return
+}
+
+func (c *Client) BookingDelete(id int) (Booking, error) {
+	return c.mutateBooking("delete", id)
+}
+
+func (c *Client) BookingCancel(id int) (Booking, error) {
+	return c.mutateBooking("cancel", id)
 }

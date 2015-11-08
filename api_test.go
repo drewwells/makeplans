@@ -123,6 +123,8 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			case "DELETE":
 				w.Write(bookingDeleteResponse)
 			}
+		case BookingURL + "410369" + "/cancel":
+			w.Write(bookingCancelResponse)
 		case PersonURL:
 			switch r.Method {
 			case "GET":
