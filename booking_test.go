@@ -54,8 +54,7 @@ var testBookingSuccess = []byte(`{"booking":{"booked_from":"2015-11-10T08:00:00-
 var fakeBookingCapacityFailure bool
 
 func TestBooking_create(t *testing.T) {
-	client := realClient
-	// _, client := mockServerClient(t)
+	_, client := mockServerClient(t)
 
 	start, _ := time.Parse(time.RFC3339, "2015-11-10T12:00:00-06:00")
 	stop, _ := time.Parse(time.RFC3339, "2015-11-10T13:00:00-06:00")
@@ -80,8 +79,8 @@ func TestBooking_create(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if book.ID == 0 {
-		t.Errorf("unexpected nil book: % #v\n", book)
+	if e := 410372; book.ID != e {
+		t.Errorf("got: %d wanted: %d", book.ID, e)
 	}
 	return
 
@@ -114,6 +113,7 @@ func TestBooking_delete(t *testing.T) {
 	// TODO: repeated delete error
 	// {"state":["cannot transition via \"remove\""]}
 	_, client := mockServerClient(t)
+	// client := realClient
 	id := 410369
 	book, err := client.BookingDelete(id)
 	if err != nil {

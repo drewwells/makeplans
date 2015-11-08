@@ -80,7 +80,7 @@ func (c *Client) BookingAll() ([]Booking, error) {
 
 func (c *Client) MakeBooking(b Booking) (ret Booking, err error) {
 	// Verify time slot is available
-	// b.PublicBooking = true
+	b.PublicBooking = true
 	bs, err := json.Marshal(wrapBooking{Booking: b})
 	if err != nil {
 		return
