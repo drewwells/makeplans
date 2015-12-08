@@ -74,6 +74,7 @@ func (c *Client) MakeProvider(in Provider) (p Provider, err error) {
 	if err != nil {
 		return
 	}
+	fmt.Println("sending", string(bs))
 	buf := bytes.NewBuffer(bs)
 	bs, err = c.Do("POST", ProvidersURL, buf)
 	if err != nil {

@@ -39,8 +39,20 @@ var (
 	ErrBookingCapacityLimit = errors.New("error resource_id: Not available for booking at this timeerror count: More than maximum count per booking")
 )
 
+type BookingParams struct {
+	ServiceID    int
+	EventID      int
+	ResourceID   int
+	PersonID     int
+	ExternalID   string
+	Start        *time.Time
+	End          *time.Time
+	Since        *time.Time
+	CollectionID string
+}
+
 // Booking will return all active bookings
-func (c *Client) Booking() ([]Booking, error) {
+func (c *Client) Booking(params BookingParams) ([]Booking, error) {
 	bs, err := c.Do("GET", BookingURL, nil)
 	if err != nil {
 		return nil, err
@@ -60,7 +72,8 @@ func (c *Client) Booking() ([]Booking, error) {
 
 var BookingAllURL = "/bookings/all"
 
-// BookingAll will return all bookings of all states (including declined, cancelled, expired and deleted
+// BookingAll will return all bookings of all states (including declined,
+// cancelled, expired and deleted
 func (c *Client) BookingAll() ([]Booking, error) {
 	bs, err := c.Do("GET", BookingAllURL, nil)
 	if err != nil {

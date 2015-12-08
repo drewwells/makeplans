@@ -1,6 +1,7 @@
 package makeplans
 
 import (
+	"fmt"
 	"testing"
 	"time"
 )
@@ -29,7 +30,7 @@ var testBookings = []byte(`[
 func TestBooking_list(t *testing.T) {
 	_, client := mockServerClient(t)
 
-	books, err := client.Booking()
+	books, err := client.Booking(BookingParams{})
 	if err != nil {
 		t.Error(err)
 	}
@@ -47,6 +48,16 @@ func TestBooking_list(t *testing.T) {
 		t.Fatalf("got: %d wanted: %d", book.ID, e)
 	}
 
+	client = New(ac.Name, ac.Token)
+	params := BookingParams{}
+	params.PersonID = 10
+	books, err = client.Booking(params)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, book := range books {
+		fmt.Printf("%d %d\n", book.ResourceID, book.ServiceID)
+	}
 }
 
 var testBookingSuccess = []byte(`{"booking":{"booked_from":"2015-11-10T08:00:00-06:00","booked_to":"2015-11-10T09:00:00-06:00","collection_id":null,"count":1,"created_at":"2015-11-07T09:09:32-06:00","custom_data":{},"event_id":null,"expires_at":null,"external_id":null,"id":410372,"notes":"Very handsome client","person_id":null,"resource_id":484,"service_id":394,"state":"confirmed","updated_at":"2015-11-07T09:09:32-06:00","resource":{"id":484,"title":"Calendar"},"service":{"id":394,"title":"Cross Fit Type"}}}`)
