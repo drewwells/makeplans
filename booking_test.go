@@ -1,7 +1,6 @@
 package makeplans
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -27,6 +26,57 @@ var testBookings = []byte(`[
     }
 ]`)
 
+var testBookingsResourceFilter = []byte(`[
+  {
+    "booking": {
+      "booked_from": "2015-12-14T12:00:00-06:00",
+      "booked_to": "2015-12-14T13:00:00-06:00",
+      "collection_id": null,
+      "count": 1,
+      "created_at": "2015-12-07T23:08:07-06:00",
+      "custom_data": {},
+      "event_id": null,
+      "expires_at": null,
+      "external_id": null,
+      "id": 410577,
+      "notes": "Finally a good booking",
+      "person_id": 12389,
+      "reminded_at": null,
+      "reminder_at": null,
+      "resource_id": 517,
+      "service_id": 427,
+      "state": "confirmed",
+      "updated_at": "2015-12-07T23:08:07-06:00",
+      "person": {
+        "city": null,
+        "country_code": null,
+        "created_at": "2015-11-26T09:50:48-06:00",
+        "custom_data": {},
+        "date_of_birth": null,
+        "email": null,
+        "external_id": null,
+        "id": 12389,
+        "name": "Test User",
+        "national_id_no": null,
+        "notes": null,
+        "phonenumber": null,
+        "postal_code": null,
+        "state": null,
+        "street": null,
+        "updated_at": "2015-11-26T09:50:48-06:00"
+      },
+      "resource": {
+        "id": 517,
+        "title": "jill bob"
+      },
+      "service": {
+        "id": 427,
+        "title": "Kickboxing"
+      }
+    }
+  }
+]`)
+
 func TestBooking_list(t *testing.T) {
 	_, client := mockServerClient(t)
 
@@ -48,15 +98,25 @@ func TestBooking_list(t *testing.T) {
 		t.Fatalf("got: %d wanted: %d", book.ID, e)
 	}
 
-	client = New(ac.Name, ac.Token)
-	params := BookingParams{}
-	params.PersonID = 10
+	// client = New(ac.Name, ac.Token)
+	params := BookingParams{
+		ResourceID: 517,
+	}
+
 	books, err = client.Booking(params)
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, book := range books {
-		fmt.Printf("%d %d\n", book.ResourceID, book.ServiceID)
+	if e := 1; len(books) != e {
+		t.Fatalf("got: %d wanted: %d", len(books), e)
+	}
+
+	book = books[0]
+	if e := 517; book.ResourceID != e {
+		t.Errorf("got: %d wanted: %d", book.ResourceID, e)
+	}
+	if e := 12389; book.PersonID != e {
+		t.Errorf("got: %d wanted: %d", book.PersonID, e)
 	}
 }
 

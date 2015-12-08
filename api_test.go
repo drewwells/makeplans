@@ -187,6 +187,8 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			case "GET":
 				w.Write(testBookings)
 			}
+		case "/bookings/?resource_id=517":
+			w.Write(testBookingsResourceFilter)
 		case EventsURL:
 			w.Write(testEvents)
 		default:

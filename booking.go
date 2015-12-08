@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strconv"
 	"time"
 )
@@ -53,7 +54,17 @@ type BookingParams struct {
 
 // Booking will return all active bookings
 func (c *Client) Booking(params BookingParams) ([]Booking, error) {
-	bs, err := c.Do("GET", BookingURL, nil)
+	path := BookingURL
+	var qs string
+	v := url.Values{}
+	if params.ResourceID > 0 {
+		v.Add("resource_id", strconv.Itoa(params.ResourceID))
+	}
+	if enc := v.Encode(); len(enc) > 0 {
+		qs = "?" + enc
+	}
+	bs, err := c.Do("GET", path+qs, nil)
+
 	if err != nil {
 		return nil, err
 	}
