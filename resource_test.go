@@ -167,12 +167,13 @@ var resourceOpeningResponse = []byte(`{"resource":{"capacity":1,"created_at":"20
 
 func TestResource_opening(t *testing.T) {
 	_, client := mockServerClient(t)
-	to, err := time.Parse("2006-01-02", "2015-08-01")
+	layout := "2006-01-02"
+	to, err := time.Parse(layout, "2015-08-01")
 	if err != nil {
 		t.Fatal(err)
 	}
 	e := 501
-	rsc, err := client.ResourceOpening(e, time.Now(), to)
+	rsc, err := client.ResourceOpening(e, to, to)
 	if err != nil {
 		t.Fatal(err)
 	}
