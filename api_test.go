@@ -289,8 +289,14 @@ var testSlots = []byte(`[
 
 func TestSlot_list(t *testing.T) {
 	_, client := mockServerClient(t)
+	layout := "2006-01-02"
 
-	slots, err := client.ServiceSlot("running", time.Now(), time.Now())
+	prev, err := time.Parse(layout, "2015-11-07")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	slots, err := client.ServiceSlot("running", prev, prev)
 	if err != nil {
 		t.Error(err)
 	}
