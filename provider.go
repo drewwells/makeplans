@@ -3,7 +3,6 @@ package makeplans
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"time"
 )
@@ -74,7 +73,7 @@ func (c *Client) MakeProvider(in Provider) (p Provider, err error) {
 	if err != nil {
 		return
 	}
-	fmt.Println("sending", string(bs))
+
 	buf := bytes.NewBuffer(bs)
 	bs, err = c.Do("POST", ProvidersURL, buf)
 	if err != nil {
@@ -94,13 +93,12 @@ func (c *Client) ProviderUpdate(in Provider) (p Provider, err error) {
 		return
 	}
 	buf := bytes.NewBuffer(bs)
-	fmt.Println("put", ProvidersURL+sid)
-	fmt.Println(string(bs))
+
 	bs, err = c.Do("PUT", ProvidersURL+sid, buf)
 	if err != nil {
 		return
 	}
-	fmt.Println("found", string(bs))
+
 	var pw providerWrap
 	err = json.Unmarshal(bs, &pw)
 	p = pw.Provider

@@ -37,6 +37,8 @@ func New(account string, token string) *Client {
 	}
 }
 
+var showResponse = false
+
 func (c *Client) do(method string, path string, body io.Reader) (*http.Response, error) {
 	var httpCli *http.Client
 
@@ -72,6 +74,7 @@ func (c *Client) Do(method string, path string, body io.Reader) ([]byte, error) 
 	}
 	defer r.Body.Close()
 	bs, err := ioutil.ReadAll(r.Body)
+	// fmt.Println(string(bs))
 	if err != nil {
 		return nil, err
 	}

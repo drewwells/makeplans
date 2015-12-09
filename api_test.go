@@ -165,8 +165,12 @@ func mockServerClient(t *testing.T) (*httptest.Server, *Client) {
 			}
 		case "/services/320/next_available_date":
 			w.Write(testSlotNext)
-		case "/services/running/slots?from=2015-11-07&to=2015-11-07":
-			w.Write(testSlots)
+		case "/services/427/slots?from=2015-12-14&to=2015-12-15":
+			fallthrough
+		case "/services/427/slots?from=2015-12-14&selected_resources=501%2C517&to=2015-12-15":
+			w.Write(testSlotsAll)
+		case "/services/427/slots?from=2015-12-14&selected_resources=517&to=2015-12-15":
+			w.Write(testSlots501)
 		case "/resources/501?from=2015-08-01&to=2015-08-01":
 			w.Write(resourceOpeningResponse)
 		case ResourceURL + "/":

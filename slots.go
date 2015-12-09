@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -24,19 +26,38 @@ type slotWrap struct {
 	Slot Slot `json:"slot"`
 }
 
-var SlotURL = "/services/%s/slots" // service_id
+// SlotParams are used for finding available slots for service slots and
+// next available data
+type SlotParams struct {
+	From              time.Time
+	To                time.Time
+	SelectedResources []int
+	OnlyFree          bool
+}
+
+var SlotURL = "/services/%d/slots" // service_id
 
 // ServiceSlot shows all available slots for a service
-func (c *Client) ServiceSlot(serviceID string, from, to time.Time) ([]Slot, error) {
+func (c *Client) ServiceSlot(serviceID int, params SlotParams) ([]Slot, error) {
 	path := fmt.Sprintf(SlotURL, serviceID)
 	v := url.Values{}
 	layout := "2006-01-02"
+	from := params.From
+	to := params.To
 	if !from.IsZero() {
 		v.Set("from", from.Format(layout))
 	}
 	if !from.IsZero() {
 		v.Set("to", to.Format(layout))
 	}
+	if len(params.SelectedResources) > 0 {
+		var s []string
+		for _, res := range params.SelectedResources {
+			s = append(s, strconv.Itoa(res))
+		}
+		v.Add("selected_resources", strings.Join(s, ","))
+	}
+
 	bs, err := c.Do("GET", path+"?"+v.Encode(), nil)
 	if err != nil {
 		return nil, err
