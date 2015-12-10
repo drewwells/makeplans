@@ -52,8 +52,21 @@ type BookingParams struct {
 	CollectionID string
 }
 
-// Booking will return all active bookings
-func (c *Client) Booking(params BookingParams) ([]Booking, error) {
+// Booking returns just booking matching the passed id
+func (c *Client) Booking(bookingID int) (Booking, error) {
+	var ret Booking
+	path := BookingURL + strconv.Itoa(bookingID)
+	bs, err := c.Do("GET", path, nil)
+	if err != nil {
+		return ret, err
+	}
+	var wrap wrapBooking
+	err = json.Unmarshal(bs, &wrap)
+	return wrap.Booking, err
+}
+
+// Bookings will return all active bookings with applied filters
+func (c *Client) Bookings(params BookingParams) ([]Booking, error) {
 	path := BookingURL
 	var qs string
 	v := url.Values{}
@@ -165,6 +178,19 @@ func (c *Client) mutateBooking(action string, id int) (ret Booking, err error) {
 	err = json.Unmarshal(bs, &wrap)
 	ret = wrap.Booking
 	return
+}
+
+func (c *Client) BookingUpdate(b Booking) (Booking, error) {
+
+	bs, err := json.Marshal(wrapBooking{Booking: b})
+	if err != nil {
+		return Booking{}, err
+	}
+
+	bs, err = c.Do("PUT", BookingURL+"/"+strconv.Itoa(b.ID), bytes.NewBuffer(bs))
+	wrap := wrapBooking{}
+	err = json.Unmarshal(bs, &wrap)
+	return wrap.Booking, err
 }
 
 func (c *Client) BookingDelete(id int) (Booking, error) {

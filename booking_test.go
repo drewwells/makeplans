@@ -77,12 +77,31 @@ var testBookingsResourceFilter = []byte(`[
   }
 ]`)
 
+var bookingOneResponse = []byte(`{"booking":{"booked_from":"2015-11-10T08:00:00-06:00","booked_to":"2015-11-10T09:00:00-06:00","collection_id":null,"count":1,"created_at":"2015-11-07T08:59:57-06:00","custom_data":{},"event_id":null,"expires_at":null,"external_id":null,"id":410369,"notes":"Very handsome client","person_id":null,"reminded_at":null,"reminder_at":null,"resource_id":484,"service_id":394,"state":"deleted","updated_at":"2015-11-08T10:14:54-06:00","resource":{"id":484,"title":"Calendar"},"service":{"id":394,"title":"Cross Fit Type"}}}`)
+
+func TestBooking_one(t *testing.T) {
+	_, client := mockServerClient(t)
+	//client := New(ac.Name, ac.Token)
+	id := 410369
+	book, err := client.Booking(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if book.ID != id {
+		t.Errorf("got: %d wanted: %d", book.ID, id)
+	}
+	if e := "deleted"; book.State != e {
+		t.Errorf("got: %s wanted: %s", book.State, e)
+	}
+
+}
+
 func TestBooking_list(t *testing.T) {
 	_, client := mockServerClient(t)
 
-	books, err := client.Booking(BookingParams{})
+	books, err := client.Bookings(BookingParams{})
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if e := 1; len(books) != e {
@@ -103,7 +122,7 @@ func TestBooking_list(t *testing.T) {
 		ResourceID: 517,
 	}
 
-	books, err = client.Booking(params)
+	books, err = client.Bookings(params)
 	if err != nil {
 		t.Fatal(err)
 	}
