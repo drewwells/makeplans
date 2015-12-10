@@ -3,13 +3,13 @@ Wrapper for https://github.com/makeplans/makeplans-api/.
 Supports the following API endpoints:
 
 - [x] Slots
-- [ ] Bookings
-- [ ] People
+- [x] Bookings
+- [x] People
 - [x] Services
 - [ ] Events
-- [ ] Resources
+- [x] Resources
 - [ ] Resource exception dates
-- [ ] Providers
+- [x] Providers
 - [ ] Categories
 - [ ] Users
 - [ ] Client
