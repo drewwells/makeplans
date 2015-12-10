@@ -46,9 +46,9 @@ type BookingParams struct {
 	ResourceID   int
 	PersonID     int
 	ExternalID   string
-	Start        *time.Time
-	End          *time.Time
-	Since        *time.Time
+	Start        time.Time
+	End          time.Time
+	Since        time.Time
 	CollectionID string
 }
 
@@ -57,9 +57,29 @@ func (c *Client) Booking(params BookingParams) ([]Booking, error) {
 	path := BookingURL
 	var qs string
 	v := url.Values{}
+	if params.ServiceID > 0 {
+		v.Add("service_id", strconv.Itoa(params.ServiceID))
+	}
 	if params.ResourceID > 0 {
 		v.Add("resource_id", strconv.Itoa(params.ResourceID))
 	}
+	if params.PersonID > 0 {
+		v.Add("person_id", strconv.Itoa(params.PersonID))
+	}
+	if params.EventID > 0 {
+		v.Add("event_id", strconv.Itoa(params.EventID))
+	}
+	if len(params.ExternalID) > 0 {
+		v.Add("external_id", params.ExternalID)
+	}
+	layout := "2006-01-02"
+	if !params.Start.IsZero() {
+		v.Set("start", params.Start.Format(layout))
+	}
+	if !params.End.IsZero() {
+		v.Set("end", params.End.Format(layout))
+	}
+
 	if enc := v.Encode(); len(enc) > 0 {
 		qs = "?" + enc
 	}

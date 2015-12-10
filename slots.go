@@ -47,7 +47,7 @@ func (c *Client) ServiceSlot(serviceID int, params SlotParams) ([]Slot, error) {
 	if !from.IsZero() {
 		v.Set("from", from.Format(layout))
 	}
-	if !from.IsZero() {
+	if !to.IsZero() {
 		v.Set("to", to.Format(layout))
 	}
 	if len(params.SelectedResources) > 0 {
